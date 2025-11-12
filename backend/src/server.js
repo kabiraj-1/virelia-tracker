@@ -5,9 +5,11 @@ import { connectDB } from './config/database.js';
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// CORS configuration
+// CORS configuration - ALL DOMAINS ADD गर्नुहोस्
 app.use(cors({
   origin: [
+    'https://www.kabirajbhatt.com.np',          // NEW DOMAIN
+    'https://kabirajbhatt.com.np',              // ALSO ADD WITHOUT WWW
     'https://virelia-tracker-frontend-2frcwk7h8-kabiraj-1s-projects.vercel.app',
     'https://virelia-tracker-frontend-mj8i5zvl7-kabiraj-1s-projects.vercel.app',
     'https://virelia-tracker-frontend.vercel.app',
@@ -119,22 +121,7 @@ app.post('/api/auth/login', (req, res) => {
   }
 });
 
-app.get('/api/auth/profile', (req, res) => {
-  res.json({
-    success: true,
-    message: 'User profile (Demo Mode)',
-    data: {
-      user: {
-        id: 'demo-user-id',
-        name: 'Demo User',
-        email: 'demo@example.com',
-        karmaPoints: 200
-      }
-    }
-  });
-});
-
-// ==================== EXISTING ROUTES ====================
+// EXISTING ROUTES
 app.get('/api/health', (req, res) => {
   res.json({
     success: true,
@@ -170,7 +157,7 @@ app.use('*', (req, res) => {
 app.listen(PORT, () => {
   console.log('Server running on port ' + PORT);
   console.log('Environment: ' + process.env.NODE_ENV);
-  console.log('CORS enabled for frontend domains');
+  console.log('CORS enabled for: www.kabirajbhatt.com.np and other domains');
 });
 
 // Graceful shutdown
