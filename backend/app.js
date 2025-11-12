@@ -36,5 +36,6 @@ app.use(cors({
 }));
 
 // Other middleware
+import authRoutes from './routes/authRoutes.js';
 app.use(express.json());
-// ... rest of your middleware and routes
+app.use('/api/auth', authRoutes);
