@@ -1,24 +1,26 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import authRoutes from '../routes/auth.js';
+import eventRoutes from '../routes/events.js';
 
 dotenv.config();
 const app = express();
 
-// CORS configuration with preflight support
+// CORS configuration
 app.use(cors({
-  origin: true, // Allow all origins
+  origin: true,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
-  preflightContinue: false,
-  optionsSuccessStatus: 200
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
 }));
 
-// Handle preflight requests explicitly
 app.options('*', cors());
-
 app.use(express.json());
+
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/events', eventRoutes);
 
 // Basic root route
 app.get('/', (req, res) => {
@@ -42,7 +44,6 @@ app.get('/api/health', (req, res) => {
 
 // Test route for frontend connection
 app.get('/api/test', (req, res) => {
-  // Add CORS headers manually for extra safety
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
