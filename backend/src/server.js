@@ -8,8 +8,9 @@ const PORT = process.env.PORT || 5000;
 // CORS configuration - ALL DOMAINS ADD गर्नुहोस्
 app.use(cors({
   origin: [
-    'https://www.kabirajbhatt.com.np',          // NEW DOMAIN
-    'https://kabirajbhatt.com.np',              // ALSO ADD WITHOUT WWW
+    'https://virelia-tracker-frontend-5zn5ccucn-kabiraj-1s-projects.vercel.app', // NEW DEPLOYMENT
+    'https://www.kabirajbhatt.com.np',
+    'https://kabirajbhatt.com.np',
     'https://virelia-tracker-frontend-2frcwk7h8-kabiraj-1s-projects.vercel.app',
     'https://virelia-tracker-frontend-mj8i5zvl7-kabiraj-1s-projects.vercel.app',
     'https://virelia-tracker-frontend.vercel.app',
@@ -157,7 +158,7 @@ app.use('*', (req, res) => {
 app.listen(PORT, () => {
   console.log('Server running on port ' + PORT);
   console.log('Environment: ' + process.env.NODE_ENV);
-  console.log('CORS enabled for: www.kabirajbhatt.com.np and other domains');
+  console.log('CORS enabled for multiple domains including new deployment');
 });
 
 // Graceful shutdown
