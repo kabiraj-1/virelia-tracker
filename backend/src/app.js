@@ -1,66 +1,85 @@
 import express from 'express';
 import cors from 'cors';
-import helmet from 'helmet';
-import compression from 'compression';
-import rateLimit from 'express-rate-limit';
-import { errorHandler } from './middleware/errorHandler.js';
-import { logger } from './middleware/logger.js';
-import authRoutes from './routes/authRoutes.js';
-import userRoutes from './routes/userRoutes.js';
-import locationRoutes from './routes/locationRoutes.js';
-import chatRoutes from './routes/chatRoutes.js';
-import analyticsRoutes from './routes/analyticsRoutes.js';
+import dotenv from 'dotenv';
+
+// Load env vars
+dotenv.config();
 
 const app = express();
 
-// Security Middleware
-app.use(helmet());
-app.use(compression());
-
-// Rate Limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 1000 // limit each IP to 1000 requests per windowMs
-});
-app.use(limiter);
-
-// CORS Configuration
+// CORS configuration - Updated with all your domains
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
-  credentials: true
+  origin: [
+    'http://localhost:5173',
+    'https://virelia-tracker-frontend-c3wy8yxv7-kabiraj-1s-projects.vercel.app',
+    'https://virelia-tracker-frontend.vercel.app',
+    'https://kabirajbhatt.com.np',
+    'https://www.kabirajbhatt.com.np',
+    'https://virelia-tracker.onrender.com'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
 }));
 
-// Body Parsing Middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
-// Logging
-app.use(logger);
-
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/locations', locationRoutes);
-app.use('/api/chat', chatRoutes);
-app.use('/api/analytics', analyticsRoutes);
-
-// Health Check
-app.get('/api/health', (req, res) => {
-  res.status(200).json({
-    status: 'OK',
+// Basic root route
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'íº€ Virelia Tracker Backend is running!',
     timestamp: new Date().toISOString(),
-    uptime: process.uptime()
+    version: '2.0.0'
   });
 });
 
-// Error Handling
-app.use(errorHandler);
+// Health check route
+app.get('/api/health', (req, res) => {
+  res.json({
+    success: true,
+    message: 'âœ… Server is healthy',
+    timestamp: new Date().toISOString(),
+    database: 'MongoDB Atlas'
+  });
+});
 
-// 404 Handler
+// Test route for frontend connection
+app.get('/api/test', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Backend API is working!',
+    data: {
+      server: 'Express.js',
+      status: 'running',
+      database: 'MongoDB Atlas',
+      features: ['User Authentication', 'Event Tracking', 'Karma System'],
+      timestamp: new Date().toISOString()
+    }
+  });
+});
+
+// Test Database Route
+app.get('/api/test-db', async (req, res) => {
+  try {
+    res.json({
+      success: true,
+      message: 'Database connection established',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Database connection failed',
+      error: error.message
+    });
+  }
+});
+
+// Catch all handler for undefined routes
 app.use('*', (req, res) => {
   res.status(404).json({
     success: false,
-    message: 'Route not found'
+    message: `Route ${req.originalUrl} not found`
   });
 });
 
