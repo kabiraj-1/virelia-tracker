@@ -29,7 +29,7 @@ connectDB();
 app.get('/api/auth/health', (req, res) => {
   res.json({
     success: true,
-    message: '‚úÖ Auth routes are working!',
+    message: 'Auth routes are working!',
     timestamp: new Date().toISOString()
   });
 });
@@ -37,8 +37,8 @@ app.get('/api/auth/health', (req, res) => {
 app.post('/api/auth/register', (req, res) => {
   try {
     const { name, email, password } = req.body;
-    
-    console.log('Ì≥ù Registration attempt:', { name, email });
+
+    console.log('Registration attempt:', { name, email });
 
     // Simple validation
     if (!name || !email || !password) {
@@ -58,7 +58,7 @@ app.post('/api/auth/register', (req, res) => {
     // Temporary success response (no database)
     res.status(201).json({
       success: true,
-      message: '‚úÖ User registered successfully! (Demo Mode)',
+      message: 'User registered successfully! (Demo Mode)',
       data: {
         user: {
           id: 'demo-' + Date.now(),
@@ -69,7 +69,7 @@ app.post('/api/auth/register', (req, res) => {
         token: 'demo-jwt-token-' + Date.now()
       }
     });
-    
+
   } catch (error) {
     console.error('Registration error:', error);
     res.status(500).json({
@@ -84,7 +84,7 @@ app.post('/api/auth/login', (req, res) => {
   try {
     const { email, password } = req.body;
 
-    console.log('ÔøΩÔøΩ Login attempt:', { email });
+    console.log('Login attempt:', { email });
 
     // Simple validation
     if (!email || !password) {
@@ -97,7 +97,7 @@ app.post('/api/auth/login', (req, res) => {
     // Temporary success response (no database)
     res.json({
       success: true,
-      message: '‚úÖ Login successful! (Demo Mode)',
+      message: 'Login successful! (Demo Mode)',
       data: {
         user: {
           id: 'demo-user-id',
@@ -108,7 +108,7 @@ app.post('/api/auth/login', (req, res) => {
         token: 'demo-jwt-token-' + Date.now()
       }
     });
-    
+
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({
@@ -138,7 +138,7 @@ app.get('/api/auth/profile', (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({
     success: true,
-    message: '‚úÖ Server is healthy',
+    message: 'Server is healthy',
     timestamp: new Date().toISOString(),
     database: 'MongoDB Atlas'
   });
@@ -162,15 +162,15 @@ app.get('/api/test', (req, res) => {
 app.use('*', (req, res) => {
   res.status(404).json({
     success: false,
-    message: `Route ${req.originalUrl} not found`
+    message: 'Route not found: ' + req.originalUrl
   });
 });
 
 // Start Server
 app.listen(PORT, () => {
-  console.log(`Ì∫Ä Server running on port ${PORT}`);
-  console.log(`Ì≥ä Environment: ${process.env.NODE_ENV}`);
-  console.log(`Ìºê CORS enabled for frontend domains`);
+  console.log('Server running on port ' + PORT);
+  console.log('Environment: ' + process.env.NODE_ENV);
+  console.log('CORS enabled for frontend domains');
 });
 
 // Graceful shutdown

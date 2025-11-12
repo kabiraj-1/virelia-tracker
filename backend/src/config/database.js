@@ -1,39 +1,15 @@
 import mongoose from 'mongoose';
-import { logger } from '../utils/logger.js';
 
-const connectDatabase = async () => {
+export const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-
-    logger.info(`MongoDB Connected: ${conn.connection.host}`);
+    if (!process.env.MONGODB_URI) {
+      console.log('MONGODB_URI not set, running without database');
+      return;
+    }
     
-    // Connection event handlers
-    mongoose.connection.on('error', (err) => {
-      logger.error('MongoDB connection error:', err);
-    });
-
-    mongoose.connection.on('disconnected', () => {
-      logger.warn('MongoDB disconnected');
-    });
-
-    mongoose.connection.on('reconnected', () => {
-      logger.info('MongoDB reconnected');
-    });
-
-    // Graceful shutdown
-    process.on('SIGINT', async () => {
-      await mongoose.connection.close();
-      logger.info('MongoDB connection closed through app termination');
-      process.exit(0);
-    });
-
+    await mongoose.connect(process.env.MONGODB_URI);
+    console.log('MongoDB Connected');
   } catch (error) {
-    logger.error('Error connecting to MongoDB:', error);
-    process.exit(1);
+    console.log('MongoDB connection failed, running without database');
   }
 };
-
-export default connectDatabase;
