@@ -5,10 +5,22 @@ import dotenv from 'dotenv';
 dotenv.config();
 const app = express();
 
-// Allow ALL origins for production
-app.use(cors());
+// CORS configuration with preflight support
+app.use(cors({
+  origin: true, // Allow all origins
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  preflightContinue: false,
+  optionsSuccessStatus: 200
+}));
+
+// Handle preflight requests explicitly
+app.options('*', cors());
+
 app.use(express.json());
 
+// Basic root route
 app.get('/', (req, res) => {
   res.json({
     success: true,
@@ -18,6 +30,7 @@ app.get('/', (req, res) => {
   });
 });
 
+// Health check route
 app.get('/api/health', (req, res) => {
   res.json({
     success: true,
@@ -27,7 +40,13 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Test route for frontend connection
 app.get('/api/test', (req, res) => {
+  // Add CORS headers manually for extra safety
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  
   res.json({
     success: true,
     message: 'Backend API is working!',
@@ -41,6 +60,7 @@ app.get('/api/test', (req, res) => {
   });
 });
 
+// Catch all handler for undefined routes
 app.use('*', (req, res) => {
   res.status(404).json({
     success: false,
