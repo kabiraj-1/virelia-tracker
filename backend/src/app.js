@@ -7,18 +7,33 @@ dotenv.config();
 
 const app = express();
 
-// CORS configuration - Updated with all your domains
+// CORS configuration - More permissive for development
 app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'https://virelia-tracker-frontend-c3wy8yxv7-kabiraj-1s-projects.vercel.app',
-    'https://virelia-tracker-frontend.vercel.app',
-    'https://kabirajbhatt.com.np',
-    'https://www.kabirajbhatt.com.np',
-    'https://virelia-tracker.onrender.com'
-  ],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      'http://localhost:5173',
+      'http://localhost:5174', 
+      'http://localhost:5175',
+      'http://localhost:5176',
+      'https://virelia-tracker-frontend-c3wy8yxv7-kabiraj-1s-projects.vercel.app',
+      'https://virelia-tracker-frontend.vercel.app',
+      'https://kabirajbhatt.com.np',
+      'https://www.kabirajbhatt.com.np',
+      'https://virelia-tracker.onrender.com'
+    ];
+    
+    if (allowedOrigins.indexOf(origin) !== -1 || origin.includes('localhost')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 
 app.use(express.json());
@@ -56,23 +71,6 @@ app.get('/api/test', (req, res) => {
       timestamp: new Date().toISOString()
     }
   });
-});
-
-// Test Database Route
-app.get('/api/test-db', async (req, res) => {
-  try {
-    res.json({
-      success: true,
-      message: 'Database connection established',
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Database connection failed',
-      error: error.message
-    });
-  }
 });
 
 // Catch all handler for undefined routes
