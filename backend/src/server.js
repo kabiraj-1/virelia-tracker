@@ -5,21 +5,11 @@ import { connectDB } from './config/database.js';
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// CORS configuration - ALL DOMAINS ADD गर्नुहोस्
+// WILDCARD CORS - सबै domains लाई allow गर्ने
 app.use(cors({
-  origin: [
-    'https://virelia-tracker-frontend-5zn5ccucn-kabiraj-1s-projects.vercel.app', // NEW DEPLOYMENT
-    'https://www.kabirajbhatt.com.np',
-    'https://kabirajbhatt.com.np',
-    'https://virelia-tracker-frontend-2frcwk7h8-kabiraj-1s-projects.vercel.app',
-    'https://virelia-tracker-frontend-mj8i5zvl7-kabiraj-1s-projects.vercel.app',
-    'https://virelia-tracker-frontend.vercel.app',
-    'http://localhost:5173',
-    'http://localhost:3000'
-  ],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
+  origin: '*', // सबै domains लाई allow गर्छ
+  credentials: false,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
 }));
 
 // Middleware
@@ -158,7 +148,7 @@ app.use('*', (req, res) => {
 app.listen(PORT, () => {
   console.log('Server running on port ' + PORT);
   console.log('Environment: ' + process.env.NODE_ENV);
-  console.log('CORS enabled for multiple domains including new deployment');
+  console.log('CORS: Wildcard enabled - all domains allowed');
 });
 
 // Graceful shutdown
