@@ -1,57 +1,53 @@
 import express from 'express';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import User from '../models/User.js';
 
 const router = express.Router();
 
-// REGISTER ROUTE
-router.post('/register', async (req, res) => {
+// AUTH HEALTH CHECK
+router.get('/health', (req, res) => {
+  res.json({
+    success: true,
+    message: '‚úÖ Auth routes are working!',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// TEMPORARY REGISTER (without database - DEMO MODE)
+router.post('/register', (req, res) => {
   try {
     const { name, email, password } = req.body;
+    
+    console.log('Ì≥ù Registration attempt:', { name, email });
 
-    // Check if user exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
+    // Simple validation
+    if (!name || !email || !password) {
       return res.status(400).json({
         success: false,
-        message: 'User already exists with this email'
+        message: 'Please provide name, email and password'
       });
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 6 characters'
+      });
+    }
 
-    // Create user
-    const user = new User({
-      name,
-      email,
-      password: hashedPassword
-    });
-
-    await user.save();
-
-    // Generate token
-    const token = jwt.sign(
-      { userId: user._id },
-      process.env.JWT_SECRET || 'fallback_secret',
-      { expiresIn: '7d' }
-    );
-
+    // Temporary success response (no database)
     res.status(201).json({
       success: true,
-      message: 'User registered successfully!',
+      message: '‚úÖ User registered successfully! (Demo Mode)',
       data: {
         user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          karmaPoints: user.karmaPoints
+          id: 'demo-' + Date.now(),
+          name: name,
+          email: email,
+          karmaPoints: 100
         },
-        token
+        token: 'demo-jwt-token-' + Date.now()
       }
     });
-
+    
   } catch (error) {
     console.error('Registration error:', error);
     res.status(500).json({
@@ -62,50 +58,36 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// LOGIN ROUTE
-router.post('/login', async (req, res) => {
+// TEMPORARY LOGIN (without database - DEMO MODE)
+router.post('/login', (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Find user
-    const user = await User.findOne({ email });
-    if (!user) {
+    console.log('Ì¥ê Login attempt:', { email });
+
+    // Simple validation
+    if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid email or password'
+        message: 'Please provide email and password'
       });
     }
 
-    // Check password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid email or password'
-      });
-    }
-
-    // Generate token
-    const token = jwt.sign(
-      { userId: user._id },
-      process.env.JWT_SECRET || 'fallback_secret',
-      { expiresIn: '7d' }
-    );
-
+    // Temporary success response (no database)
     res.json({
       success: true,
-      message: 'Login successful!',
+      message: '‚úÖ Login successful! (Demo Mode)',
       data: {
         user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          karmaPoints: user.karmaPoints
+          id: 'demo-user-id',
+          name: 'Demo User',
+          email: email,
+          karmaPoints: 150
         },
-        token
+        token: 'demo-jwt-token-' + Date.now()
       }
     });
-
+    
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({
@@ -116,12 +98,19 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// AUTH HEALTH CHECK
-router.get('/health', (req, res) => {
+// GET USER PROFILE (DEMO)
+router.get('/profile', (req, res) => {
   res.json({
     success: true,
-    message: 'Auth routes are working!',
-    timestamp: new Date().toISOString()
+    message: 'User profile (Demo Mode)',
+    data: {
+      user: {
+        id: 'demo-user-id',
+        name: 'Demo User',
+        email: 'demo@example.com',
+        karmaPoints: 200
+      }
+    }
   });
 });
 
