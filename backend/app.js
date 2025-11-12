@@ -15,3 +15,26 @@ app.get('/api/test-db', async (req, res) => {
     });
   }
 });
+// app.js मा
+import express from 'express';
+import cors from 'cors';
+
+const app = express();
+
+// CORS configuration
+app.use(cors({
+  origin: [
+    'https://virelia-tracker-frontend-2frcwk7h8-kabiraj-1s-projects.vercel.app',
+    'https://virelia-tracker-frontend-mj8i5zvl7-kabiraj-1s-projects.vercel.app', 
+    'https://virelia-tracker-frontend.vercel.app',
+    'http://localhost:5173',
+    'http://localhost:3000'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
+}));
+
+// Other middleware
+app.use(express.json());
+// ... rest of your middleware and routes
