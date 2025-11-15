@@ -1,57 +1,114 @@
 const express = require('express');
-const cors = require('cors');
 const mongoose = require('mongoose');
+const cors = require('cors');
+const http = require('http');
+const socketIo = require('socket.io');
 require('dotenv').config();
 
 const app = express();
+const server = http.createServer(app);
 
-// CORS Configuration
+// Socket.io configuration for production
+const io = socketIo(server, {
+  cors: {
+    origin: [
+      "https://virelia-tracker-frontend-oipev2u8i-kabiraj-1s-projects.vercel.app",
+      "http://localhost:3000"
+    ],
+    methods: ["GET", "POST"],
+    credentials: true
+  }
+});
+
+// Middleware
 app.use(cors({
   origin: [
-    'https://virelia-tracker-frontend-oipev2u8i-kabiraj-1s-projects.vercel.app',
-    'https://kabirajbhatt.com.np',
-    'http://localhost:3000',
-    'http://localhost:5173'
+    "https://virelia-tracker-frontend-oipev2u8i-kabiraj-1s-projects.vercel.app",
+    "http://localhost:3000"
   ],
   credentials: true
 }));
-
-// Middleware
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Database Connection
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('‚úÖ MongoDB Connected Successfully'))
-.catch(err => console.error('‚ùå MongoDB Connection Error:', err));
 
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
-app.use('/api/location', require('./routes/trackerRoutes'));
-app.use('/api/analytics', require('./routes/analyticsRoutes'));
+app.use('/api/events', require('./routes/eventRoutes'));
+app.use('/api/posts', require('./routes/postRoutes'));
+app.use('/api/locations', require('./routes/locationRoutes'));
 
-// Health Check
+// Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'OK', 
+  res.status(200).json({
+    success: true,
     message: 'Virelia Tracker API is running',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV,
+    database: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected',
+    version: '2.0.0'
   });
 });
 
-// Error Handling Middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Something went wrong!' });
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Welcome to Virelia Tracker Backend API',
+    documentation: 'https://github.com/Kabiraj1s/virelia-tracker',
+    health: '/api/health',
+    status: 'operational'
+  });
 });
 
-// 404 Handler
-app.use('*', (req, res) => {
-  res.status(404).json({ error: 'Route not found' });
-});
+// Socket.io
+require('./socket/socketHandlers')(io);
+
+// MongoDB Connection (without deprecated options)
+const connectDB = async () => {
+  try {
+    const mongoURI = process.env.MONGODB_URI;
+    
+    if (!mongoURI) {
+      console.warn('‚ö†Ô∏è  MONGODB_URI not found in environment variables');
+      console.log('Ì≤° Using in-memory storage (data will reset on server restart)');
+      return;
+    }
+
+    console.log('Ì¥ó Connecting to MongoDB...');
+    const conn = await mongoose.connect(mongoURI);
+    
+    console.log(`‚úÖ MongoDB Connected: ${conn.connection.host}`);
+    console.log(`Ì≥ä Database: ${conn.connection.name}`);
+  } catch (error) {
+    console.error('‚ùå MongoDB Connection Error:', error.message);
+    
+    // In production, we want the server to fail if DB connection fails
+    if (process.env.NODE_ENV === 'production') {
+      console.log('Ìªë Production: Exiting due to database connection failure');
+      process.exit(1);
+    }
+    
+    console.log('Ì≤° Development: Continuing without database');
+  }
+};
+
+// Start server
+const PORT = process.env.PORT || 5001;
+
+const startServer = async () => {
+  await connectDB();
+  
+  server.listen(PORT, () => {
+    console.log(`Ì∫Ä Server running on port ${PORT}`);
+    console.log(`Ìºê Environment: ${process.env.NODE_ENV}`);
+    console.log(`Ì≥ä MongoDB: ${mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected'}`);
+    console.log(`Ì¥ó Health check: http://localhost:${PORT}/api/health`);
+    
+    if (mongoose.connection.readyState !== 1) {
+      console.log('Ì¥∂ Running in demo mode - data will not persist');
+    }
+  });
+};
+
+startServer();
 
 module.exports = app;

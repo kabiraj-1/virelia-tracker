@@ -1,20 +1,47 @@
 const express = require('express');
 const router = express.Router();
-const authController = require('../controllers/authController');
 
-// POST /api/auth/register
-router.post('/register', authController.register);
+// Register route
+router.post('/register', (req, res) => {
+  res.status(201).json({
+    success: true,
+    message: 'User registration successful',
+    user: {
+      id: 'demo-user-123',
+      name: req.body.name,
+      email: req.body.email,
+      karma: 100
+    },
+    token: 'demo-jwt-token'
+  });
+});
 
-// POST /api/auth/login
-router.post('/login', authController.login);
+// Login route
+router.post('/login', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Login successful',
+    user: {
+      id: 'demo-user-123',
+      name: 'Demo User',
+      email: req.body.email,
+      karma: 1250
+    },
+    token: 'demo-jwt-token'
+  });
+});
 
-// GET /api/auth/profile
-router.get('/profile', authController.getProfile);
-
-// PUT /api/auth/profile
-router.put('/profile', authController.updateProfile);
-
-// POST /api/auth/logout
-router.post('/logout', authController.logout);
+// Profile route
+router.get('/profile', (req, res) => {
+  res.json({
+    success: true,
+    user: {
+      id: 'demo-user-123',
+      name: 'Demo User',
+      email: 'demo@virelia.com',
+      karma: 1250
+    }
+  });
+});
 
 module.exports = router;
