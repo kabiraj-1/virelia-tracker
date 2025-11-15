@@ -1,72 +1,57 @@
-import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import authRoutes from '../routes/auth.js';
-import eventRoutes from '../routes/events.js';
+const express = require('express');
+const cors = require('cors');
+const mongoose = require('mongoose');
+require('dotenv').config();
 
-dotenv.config();
 const app = express();
 
-// CORS configuration
+// CORS Configuration
 app.use(cors({
-  origin: true,
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
+  origin: [
+    'https://virelia-tracker-frontend-oipev2u8i-kabiraj-1s-projects.vercel.app',
+    'https://kabirajbhatt.com.np',
+    'http://localhost:3000',
+    'http://localhost:5173'
+  ],
+  credentials: true
 }));
 
-app.options('*', cors());
+// Middleware
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Database Connection
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log('âœ… MongoDB Connected Successfully'))
+.catch(err => console.error('âŒ MongoDB Connection Error:', err));
 
 // Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/events', eventRoutes);
+app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/location', require('./routes/trackerRoutes'));
+app.use('/api/analytics', require('./routes/analyticsRoutes'));
 
-// Basic root route
-app.get('/', (req, res) => {
-  res.json({
-    success: true,
-    message: 'íº€ Virelia Tracker Backend is running!',
-    timestamp: new Date().toISOString(),
-    version: '2.0.0'
-  });
-});
-
-// Health check route
+// Health Check
 app.get('/api/health', (req, res) => {
-  res.json({
-    success: true,
-    message: 'âœ… Server is healthy',
-    timestamp: new Date().toISOString(),
-    database: 'MongoDB Atlas'
+  res.status(200).json({ 
+    status: 'OK', 
+    message: 'Virelia Tracker API is running',
+    timestamp: new Date().toISOString()
   });
 });
 
-// Test route for frontend connection
-app.get('/api/test', (req, res) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  
-  res.json({
-    success: true,
-    message: 'Backend API is working!',
-    data: {
-      server: 'Express.js',
-      status: 'running',
-      database: 'MongoDB Atlas',
-      features: ['User Authentication', 'Event Tracking', 'Karma System'],
-      timestamp: new Date().toISOString()
-    }
-  });
+// Error Handling Middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Something went wrong!' });
 });
 
-// Catch all handler for undefined routes
+// 404 Handler
 app.use('*', (req, res) => {
-  res.status(404).json({
-    success: false,
-    message: `Route ${req.originalUrl} not found`
-  });
+  res.status(404).json({ error: 'Route not found' });
 });
 
-export default app;
+module.exports = app;

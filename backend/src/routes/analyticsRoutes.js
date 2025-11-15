@@ -1,14 +1,14 @@
-import express from 'express';
-import { 
-  getUserAnalytics, 
-  getLocationAnalytics,
-  getSocialAnalytics 
-} from '../controllers/analyticsController.js';
-
+const express = require('express');
 const router = express.Router();
+const analyticsController = require('../controllers/analyticsController');
 
-router.get('/user', getUserAnalytics);
-router.get('/location', getLocationAnalytics);
-router.get('/social', getSocialAnalytics);
+// GET /api/analytics/dashboard
+router.get('/dashboard', analyticsController.getDashboardData);
 
-export default router;
+// GET /api/analytics/karma
+router.get('/karma', analyticsController.getKarmaMetrics);
+
+// GET /api/analytics/traffic
+router.get('/traffic', analyticsController.getTrafficData);
+
+module.exports = router;

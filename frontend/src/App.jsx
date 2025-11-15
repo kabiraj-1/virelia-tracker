@@ -1,52 +1,131 @@
-import React, { useState, useEffect } from 'react'
-import axios from 'axios'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 
-function App() {
-  const [apiStatus, setApiStatus] = useState('Testing...')
-  const [backendData, setBackendData] = useState(null)
+// Components
+import Header from "./components/Shared/UI/Header";
+import LoadingSpinner from './components/Shared/Loading/LoadingSpinner';
 
-  const testBackendConnection = async () => {
-    try {
-      const response = await axios.get('http://localhost:5000/api/health')
-      setApiStatus('âœ… Connected to Backend!')
-      setBackendData(response.data)
-    } catch (error) {
-      setApiStatus('âŒ Backend Connection Failed')
-      console.error('Connection error:', error)
-    }
+// Pages
+import Dashboard from './pages/Dashboard';
+import Analytics from './pages/Analytics';
+import Location from './pages/Location';
+import Chat from './pages/Chat';
+import Profile from './pages/Profile';
+import Login from './pages/Login';
+import Register from './pages/Register';
+
+// Protected Route Component
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
+  
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+  
+  return isAuthenticated ? children : <Navigate to="/login" />;
+};
+
+// Public Route Component (redirect if authenticated)
+const PublicRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
+  
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+  
+  return !isAuthenticated ? children : <Navigate to="/dashboard" />;
+};
+
+function AppContent() {
+  const { loading } = useAuth();
+
+  if (loading) {
+    return <LoadingSpinner />;
   }
 
-  useEffect(() => {
-    testBackendConnection()
-  }, [])
-
   return (
-    <div style={{ padding: '20px', fontFamily: 'Arial' }}>
-      <h1>íº€ Virelia Tracker</h1>
-      <p>Frontend is running!</p>
-      
-      <div style={{ margin: '20px 0', padding: '15px', border: '1px solid #ccc', borderRadius: '5px' }}>
-        <h2>í´— Backend Connection Test</h2>
-        <p><strong>Status:</strong> {apiStatus}</p>
-        
-        {backendData && (
-          <div style={{ marginTop: '10px' }}>
-            <p><strong>Backend Response:</strong></p>
-            <pre style={{ background: '#f5f5f5', padding: '10px', borderRadius: '3px' }}>
-              {JSON.stringify(backendData, null, 2)}
-            </pre>
-          </div>
-        )}
-      </div>
-
-      <button 
-        onClick={testBackendConnection}
-        style={{ padding: '10px 20px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
-      >
-        í´„ Test Connection Again
-      </button>
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <main className="container mx-auto px-4 py-8">
+        <Routes>
+          {/* Public Routes */}
+          <Route 
+            path="/login" 
+            element={
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            } 
+          />
+          <Route 
+            path="/register" 
+            element={
+              <PublicRoute>
+                <Register />
+              </PublicRoute>
+            } 
+          />
+          
+          {/* Protected Routes */}
+          <Route 
+            path="/dashboard" 
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/analytics" 
+            element={
+              <ProtectedRoute>
+                <Analytics />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/location" 
+            element={
+              <ProtectedRoute>
+                <Location />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/chat" 
+            element={
+              <ProtectedRoute>
+                <Chat />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/profile" 
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* Default redirect */}
+          <Route path="/" element={<Navigate to="/dashboard" />} />
+          <Route path="*" element={<Navigate to="/dashboard" />} />
+        </Routes>
+      </main>
     </div>
-  )
+  );
 }
 
-export default App
+function App() {
+  return (
+    <Router>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </Router>
+  );
+}
+
+export default App;
