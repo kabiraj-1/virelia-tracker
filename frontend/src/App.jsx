@@ -5,6 +5,7 @@ import Feed from './pages/Feed';
 import Events from './pages/Events';
 import Profile from './pages/Profile';
 import Auth from './pages/Auth';
+import Test from './Test';
 import './App.css';
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
             <Route path="/events" element={<Events />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/test" element={<Test />} />
           </Routes>
         </main>
       </div>
