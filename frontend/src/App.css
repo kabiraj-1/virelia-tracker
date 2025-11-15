@@ -23,19 +23,28 @@ body {
   min-height: calc(100vh - 60px);
 }
 
-/* Nuclear option: Hide anything that looks like connection test */
-div:has(> *:contains("Backend")),
-div:has(> *:contains("Connection")),
-div:has(> *:contains("Connected")),
-div:has(> *:contains("Backend Response")),
-div:has(> *:contains("Test Connection")),
-div:has(> *:contains("Enter Virelia Social")),
-div:has(> *:contains("Backend URL")),
-div:has(> *:contains("demo data")) {
+/* NUCLEAR: Hide any element containing connection-related text */
+body > div:has(> :is(h1, h2, h3, p, span, div):contains("Backend")),
+body > div:has(> :is(h1, h2, h3, p, span, div):contains("Connection")),
+body > div:has(> :is(h1, h2, h3, p, span, div):contains("Status:")),
+body > div:has(> pre),
+body > div:has(> button:contains("Test")),
+body > div:has(> p:contains("demo data")),
+body > div:has(> p:contains("Backend URL")),
+body > div:has(> p:contains("Enter Virelia")),
+body > div:has(> p:contains("Social features")),
+body > div:has(> p:contains("Real backend")) {
   display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  width: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
 }
 
-/* Also hide by specific text content */
-body:has(:contains("Backend Connection Test")) div:first-child {
+/* Hide the entire first div if it contains connection test */
+body > div:first-child:has(:contains("Backend Connection Test")) {
   display: none !important;
 }
