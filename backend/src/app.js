@@ -62,14 +62,13 @@ app.get('/', (req, res) => {
 // Socket.io
 require('./socket/socketHandlers')(io);
 
-// MongoDB Connection (without deprecated options)
+// MongoDB Connection with better error handling
 const connectDB = async () => {
   try {
     const mongoURI = process.env.MONGODB_URI;
     
     if (!mongoURI) {
-      console.warn('âš ï¸  MONGODB_URI not found in environment variables');
-      console.log('í²¡ Using in-memory storage (data will reset on server restart)');
+      console.log('í´¶ Running in demo mode - no database connection');
       return;
     }
 
@@ -78,36 +77,47 @@ const connectDB = async () => {
     
     console.log(`âœ… MongoDB Connected: ${conn.connection.host}`);
     console.log(`í³Š Database: ${conn.connection.name}`);
+    return true;
   } catch (error) {
     console.error('âŒ MongoDB Connection Error:', error.message);
-    
-    // In production, we want the server to fail if DB connection fails
-    if (process.env.NODE_ENV === 'production') {
-      console.log('í»‘ Production: Exiting due to database connection failure');
-      process.exit(1);
-    }
-    
-    console.log('í²¡ Development: Continuing without database');
+    console.log('í²¡ Tip: Whitelist your IP in MongoDB Atlas or use demo mode');
+    console.log('í´¶ Continuing in demo mode without database');
+    return false;
   }
 };
 
 // Start server
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5002;
 
 const startServer = async () => {
-  await connectDB();
+  // Try to connect to DB, but continue even if it fails
+  const dbConnected = await connectDB();
   
-  server.listen(PORT, () => {
+  server.listen(PORT, '0.0.0.0', () => {
     console.log(`íº€ Server running on port ${PORT}`);
     console.log(`í¼ Environment: ${process.env.NODE_ENV}`);
-    console.log(`í³Š MongoDB: ${mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected'}`);
-    console.log(`í´— Health check: http://localhost:${PORT}/api/health`);
+    console.log(`í¿  Local URL: http://localhost:${PORT}`);
+    console.log(`â¤ï¸ Health check: http://localhost:${PORT}/api/health`);
     
-    if (mongoose.connection.readyState !== 1) {
+    if (!dbConnected) {
       console.log('í´¶ Running in demo mode - data will not persist');
+      console.log('í³ To enable database, whitelist your IP in MongoDB Atlas');
+    } else {
+      console.log('âœ… Database connected - data will persist');
     }
   });
 };
+
+// Don't let MongoDB errors crash the app
+process.on('unhandledRejection', (err, promise) => {
+  console.log('í´¶ Unhandled Promise Rejection:', err.message);
+  console.log('í²¡ Application continues running in demo mode');
+});
+
+process.on('uncaughtException', (err) => {
+  console.log('í´¶ Uncaught Exception:', err.message);
+  console.log('í²¡ Application continues running in demo mode');
+});
 
 startServer();
 
