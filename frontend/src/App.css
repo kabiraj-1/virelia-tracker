@@ -23,11 +23,19 @@ body {
   min-height: calc(100vh - 60px);
 }
 
-/* Remove any connection test styles */
-.connection-test {
-  display: none;
+/* Nuclear option: Hide anything that looks like connection test */
+div:has(> *:contains("Backend")),
+div:has(> *:contains("Connection")),
+div:has(> *:contains("Connected")),
+div:has(> *:contains("Backend Response")),
+div:has(> *:contains("Test Connection")),
+div:has(> *:contains("Enter Virelia Social")),
+div:has(> *:contains("Backend URL")),
+div:has(> *:contains("demo data")) {
+  display: none !important;
 }
 
-.backend-status {
-  display: none;
+/* Also hide by specific text content */
+body:has(:contains("Backend Connection Test")) div:first-child {
+  display: none !important;
 }
