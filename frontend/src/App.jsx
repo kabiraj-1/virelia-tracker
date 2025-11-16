@@ -27,4 +27,7 @@ function App() {
   );
 }
 
+// Add a comment to force change
+console.log('App loaded - Clean version without connection test');
+
 export default App;
