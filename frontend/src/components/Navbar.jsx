@@ -11,22 +11,21 @@ const Navbar = () => {
         <Link to="/" className="nav-logo">
           Virelia
         </Link>
-        
+
         <div className="nav-menu">
-          <Link 
-            to="/" 
-            className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
+          <Link
+            to="/"
+            className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}      
           >
             Feed
           </Link>
-          <Link 
-            to="/events" 
-            className={`nav-link ${location.pathname === '/events' ? 'active' : ''}`}
-          >
+          <Link
+            to="/events"
+            className={`nav-link ${location.pathname === '/events' ? 'active' : ''}`}          >
             Events
           </Link>
-          <Link 
-            to="/profile" 
+          <Link
+            to="/profile"
             className={`nav-link ${location.pathname === '/profile' ? 'active' : ''}`}
           >
             Profile
@@ -34,8 +33,11 @@ const Navbar = () => {
         </div>
 
         <div className="nav-auth">
-          <Link to="/auth" className="login-btn">
-            Login/Sign Up
+          <Link to="/login" className="login-btn" style={{ marginRight: '1rem' }}>
+            Login
+          </Link>
+          <Link to="/register" className="signup-btn">
+            Sign Up
           </Link>
         </div>
       </div>
