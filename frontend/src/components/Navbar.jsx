@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import './Navbar.css';
 
 const Navbar = () => {
   const location = useLocation();
@@ -13,21 +12,16 @@ const Navbar = () => {
         </Link>
 
         <div className="nav-menu">
-          <Link
-            to="/"
-            className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}      
-          >
+          <Link to="/" className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}>
+            Home
+          </Link>
+          <Link to="/feed" className={`nav-link ${location.pathname === '/feed' ? 'active' : ''}`}>
             Feed
           </Link>
-          <Link
-            to="/events"
-            className={`nav-link ${location.pathname === '/events' ? 'active' : ''}`}          >
+          <Link to="/events" className={`nav-link ${location.pathname === '/events' ? 'active' : ''}`}>
             Events
           </Link>
-          <Link
-            to="/profile"
-            className={`nav-link ${location.pathname === '/profile' ? 'active' : ''}`}
-          >
+          <Link to="/profile" className={`nav-link ${location.pathname === '/profile' ? 'active' : ''}`}>
             Profile
           </Link>
         </div>
