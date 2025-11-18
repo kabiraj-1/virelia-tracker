@@ -1,45 +1,56 @@
-import mongoose from 'mongoose';
-import bcrypt from 'bcryptjs';
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
-  username: {
+  name: {
     type: String,
-    required: true,
-    unique: true,
+    required: [true, 'Name is required'],
     trim: true,
-    minlength: 3,
-    maxlength: 30
+    maxlength: [50, 'Name cannot exceed 50 characters']
   },
   email: {
     type: String,
-    required: true,
+    required: [true, 'Email is required'],
     unique: true,
-    trim: true,
-    lowercase: true
+    lowercase: true,
+    validate: {
+      validator: function(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      },
+      message: 'Please provide a valid email'
+    }
   },
   password: {
     type: String,
-    required: true,
-    minlength: 6
+    required: [true, 'Password is required'],
+    minlength: [6, 'Password must be at least 6 characters'],
+    select: false
   },
-  profile: {
-    firstName: String,
-    lastName: String,
-    avatar: String,
-    bio: String,
-    location: String,
-    timezone: String
+  avatar: {
+    type: String,
+    default: 'https://res.cloudinary.com/kabiraj/image/upload/v1700000000/default-avatar.png'
+  },
+  bio: {
+    type: String,
+    maxlength: [500, 'Bio cannot exceed 500 characters'],
+    default: 'í¼Ÿ Passionate social media enthusiast'
   },
   karma: {
-    points: {
-      type: Number,
-      default: 0
-    },
-    level: {
-      type: String,
-      enum: ['bronze', 'silver', 'gold', 'platinum'],
-      default: 'bronze'
-    }
+    type: Number,
+    default: 100
+  },
+  level: {
+    type: String,
+    enum: ['beginner', 'intermediate', 'expert', 'master'],
+    default: 'beginner'
+  },
+  isVerified: {
+    type: Boolean,
+    default: false
+  },
+  lastActive: {
+    type: Date,
+    default: Date.now
   },
   preferences: {
     theme: {
@@ -49,53 +60,64 @@ const userSchema = new mongoose.Schema({
     },
     notifications: {
       email: { type: Boolean, default: true },
-      push: { type: Boolean, default: true },
-      locationSharing: { type: Boolean, default: false }
+      push: { type: Boolean, default: true }
     }
   },
-  isVerified: {
-    type: Boolean,
-    default: false
+  socialLinks: {
+    website: String,
+    twitter: String,
+    linkedin: String,
+    github: String
   },
-  isPremium: {
-    type: Boolean,
-    default: false
-  },
-  lastActive: {
-    type: Date,
-    default: Date.now
+  statistics: {
+    postsCount: { type: Number, default: 0 },
+    eventsCreated: { type: Number, default: 0 },
+    eventsAttended: { type: Number, default: 0 },
+    karmaEarned: { type: Number, default: 0 }
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
 });
 
-// Indexes
+// Virtual for user activity score
+userSchema.virtual('activityScore').get(function() {
+  const postsWeight = this.statistics.postsCount * 2;
+  const eventsWeight = (this.statistics.eventsCreated + this.statistics.eventsAttended) * 3;
+  const karmaWeight = this.statistics.karmaEarned * 0.1;
+  return postsWeight + eventsWeight + karmaWeight;
+});
+
+// Index for better performance
 userSchema.index({ email: 1 });
-userSchema.index({ 'karma.points': -1 });
-userSchema.index({ lastActive: -1 });
+userSchema.index({ karma: -1 });
+userSchema.index({ 'statistics.postsCount': -1 });
 
 // Password hashing middleware
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
-  
-  try {
-    const salt = await bcrypt.genSalt(12);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (error) {
-    next(error);
-  }
+  this.password = await bcrypt.hash(this.password, 12);
+  next();
 });
 
 // Password comparison method
-userSchema.methods.comparePassword = async function(candidatePassword) {
-  return bcrypt.compare(candidatePassword, this.password);
+userSchema.methods.correctPassword = async function(candidatePassword, userPassword) {
+  return await bcrypt.compare(candidatePassword, userPassword);
 };
 
 // Update last active
 userSchema.methods.updateLastActive = function() {
   this.lastActive = new Date();
-  return this.save();
+  return this.save({ validateBeforeSave: false });
 };
 
-export default mongoose.model('User', userSchema);
+// Check if user is active (within last 7 days)
+userSchema.methods.isActive = function() {
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  return this.lastActive > sevenDaysAgo;
+};
+
+const User = mongoose.model('User', userSchema);
+
+module.exports = User;

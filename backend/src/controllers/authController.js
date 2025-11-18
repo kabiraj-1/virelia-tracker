@@ -1,145 +1,188 @@
-import jwt from 'jsonwebtoken';
-import User from '../models/User.js';
-import { generateToken, verifyToken } from '../utils/security.js';
-import { sendEmail } from '../services/emailService.js';
-import { logger } from '../middleware/logger.js';
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
+const { promisify } = require('util');
 
-export const register = async (req, res, next) => {
+const signToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN || '90d'
+  });
+};
+
+const createSendToken = (user, statusCode, res) => {
+  const token = signToken(user._id);
+  
+  // Remove password from output
+  user.password = undefined;
+
+  res.status(statusCode).json({
+    status: 'success',
+    token,
+    data: {
+      user
+    },
+    message: statusCode === 201 ? 'Ìæâ Welcome to Virelia! Account created successfully' : 'Ì¥ì Login successful'
+  });
+};
+
+exports.register = async (req, res, next) => {
   try {
-    const { username, email, password, profile } = req.body;
+    const { name, email, password, bio } = req.body;
 
-    // Check if user exists
-    const existingUser = await User.findOne({
-      $or: [{ email }, { username }]
-    });
-
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
-        success: false,
-        message: 'User already exists with this email or username'
+        status: 'error',
+        message: 'ÔøΩÔøΩ User with this email already exists'
       });
     }
 
-    // Create user
-    const user = new User({
-      username,
+    // Create new user
+    const newUser = await User.create({
+      name,
       email,
       password,
-      profile
+      bio: bio || 'Ìºü Passionate social media enthusiast'
     });
 
-    await user.save();
-
-    // Generate token
-    const token = generateToken(user._id);
-
-    // Remove password from response
-    const userResponse = user.toJSON();
-    delete userResponse.password;
-
-    logger.info(`New user registered: ${user.email}`);
-
-    res.status(201).json({
-      success: true,
-      message: 'User registered successfully',
-      user: userResponse,
-      token
-    });
+    createSendToken(newUser, 201, res);
   } catch (error) {
-    next(error);
+    res.status(500).json({
+      status: 'error',
+      message: '‚ùå Registration failed',
+      error: error.message
+    });
   }
 };
 
-export const login = async (req, res, next) => {
+exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    // Find user
+    // 1) Check if email and password exist
+    if (!email || !password) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Ì≥ß Please provide email and password'
+      });
+    }
+
+    // 2) Check if user exists && password is correct
     const user = await User.findOne({ email }).select('+password');
-    if (!user) {
+
+    if (!user || !(await user.correctPassword(password, user.password))) {
       return res.status(401).json({
-        success: false,
-        message: 'Invalid credentials'
+        status: 'error',
+        message: '‚ùå Incorrect email or password'
       });
     }
 
-    // Check password
-    const isPasswordValid = await user.comparePassword(password);
-    if (!isPasswordValid) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid credentials'
-      });
-    }
-
-    // Update last active
+    // 3) Update last active
     await user.updateLastActive();
 
-    // Generate token
-    const token = generateToken(user._id);
-
-    // Remove password from response
-    const userResponse = user.toJSON();
-    delete userResponse.password;
-
-    logger.info(`User logged in: ${user.email}`);
-
-    res.json({
-      success: true,
-      message: 'Login successful',
-      user: userResponse,
-      token
-    });
+    // 4) If everything ok, send token to client
+    createSendToken(user, 200, res);
   } catch (error) {
-    next(error);
+    res.status(500).json({
+      status: 'error',
+      message: '‚ùå Login failed',
+      error: error.message
+    });
   }
 };
 
-export const getProfile = async (req, res, next) => {
+exports.protect = async (req, res, next) => {
+  try {
+    // 1) Getting token and check if it's there
+    let token;
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+      token = req.headers.authorization.split(' ')[1];
+    }
+
+    if (!token) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Ì¥ê You are not logged in! Please log in to get access'
+      });
+    }
+
+    // 2) Verification token
+    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+
+    // 3) Check if user still exists
+    const currentUser = await User.findById(decoded.id);
+    if (!currentUser) {
+      return res.status(401).json({
+        status: 'error',
+        message: '‚ùå The user belonging to this token no longer exists'
+      });
+    }
+
+    // 4) Check if user changed password after the token was issued
+    // (We'll implement this if we add password change functionality)
+
+    // GRANT ACCESS TO PROTECTED ROUTE
+    req.user = currentUser;
+    next();
+  } catch (error) {
+    res.status(401).json({
+      status: 'error',
+      message: '‚ùå Invalid token',
+      error: error.message
+    });
+  }
+};
+
+exports.getMe = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id);
-    res.json({
-      success: true,
-      user
+    
+    res.status(200).json({
+      status: 'success',
+      data: {
+        user
+      }
     });
   } catch (error) {
-    next(error);
+    res.status(500).json({
+      status: 'error',
+      message: '‚ùå Failed to fetch user data',
+      error: error.message
+    });
   }
 };
 
-export const updateProfile = async (req, res, next) => {
+exports.updateMe = async (req, res, next) => {
   try {
-    const { profile, preferences } = req.body;
+    const { name, bio, avatar, socialLinks, preferences } = req.body;
     
-    const user = await User.findByIdAndUpdate(
+    const updatedUser = await User.findByIdAndUpdate(
       req.user.id,
-      { 
-        $set: { 
-          ...(profile && { profile }),
-          ...(preferences && { preferences })
-        }
+      {
+        name,
+        bio,
+        avatar,
+        socialLinks,
+        preferences
       },
-      { new: true, runValidators: true }
+      {
+        new: true,
+        runValidators: true
+      }
     );
 
-    res.json({
-      success: true,
-      message: 'Profile updated successfully',
-      user
+    res.status(200).json({
+      status: 'success',
+      data: {
+        user: updatedUser
+      },
+      message: '‚úÖ Profile updated successfully'
     });
   } catch (error) {
-    next(error);
-  }
-};
-
-export const verifyToken = async (req, res, next) => {
-  try {
-    const user = await User.findById(req.user.id);
-    res.json({
-      success: true,
-      user
+    res.status(500).json({
+      status: 'error',
+      message: '‚ùå Failed to update profile',
+      error: error.message
     });
-  } catch (error) {
-    next(error);
   }
 };
