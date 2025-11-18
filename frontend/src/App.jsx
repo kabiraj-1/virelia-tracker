@@ -7,7 +7,7 @@ import Events from './pages/Events';
 import Profile from './pages/Profile';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider } from ../contexts/AuthContext';
 import './App.css';
 
 function App() {
