@@ -1,15 +1,20 @@
 import React, { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import PostsFeed from '../components/PostsFeed'
+import CreatePost from '../components/CreatePost'
+import FriendsList from '../components/FriendsList'
+import ChatInterface from '../components/ChatInterface'
+import Notifications from '../components/Notifications'
 
 const Dashboard = () => {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState('feed')
   const navigate = useNavigate()
 
   useEffect(() => {
     console.log('Dashboard mounted - checking authentication...')
     
-    // Check if user is logged in
     const token = localStorage.getItem('token')
     const userData = localStorage.getItem('user')
     
@@ -43,6 +48,11 @@ const Dashboard = () => {
     navigate('/')
   }
 
+  const handlePostCreated = () => {
+    // Refresh posts feed if needed
+    setActiveTab('feed')
+  }
+
   if (loading) {
     return (
       <div className="container">
@@ -62,7 +72,7 @@ const Dashboard = () => {
             borderRadius: '50%',
             animation: 'spin 1s linear infinite'
           }}></div>
-          <div>Checking authentication...</div>
+          <div>Loading dashboard...</div>
         </div>
       </div>
     )
@@ -74,9 +84,9 @@ const Dashboard = () => {
         <div style={{ textAlign: 'center', padding: '2rem' }}>
           <h2>Authentication Required</h2>
           <p>Please log in to access the dashboard.</p>
-          <Link to="/login" className="btn btn-primary">
+          <button onClick={() => navigate('/login')} className="btn btn-primary">
             Go to Login
-          </Link>
+          </button>
         </div>
       </div>
     )
@@ -84,103 +94,108 @@ const Dashboard = () => {
 
   return (
     <div className="container">
+      {/* Header */}
       <div style={{ 
-        maxWidth: '800px', 
-        margin: '2rem auto', 
-        padding: '2rem', 
         background: 'white', 
         borderRadius: '1rem', 
-        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' 
+        padding: '2rem', 
+        marginBottom: '1.5rem',
+        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+        border: '1px solid #e2e8f0'
       }}>
         <div style={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
-          alignItems: 'center', 
-          marginBottom: '2rem' 
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '1rem'
         }}>
           <div>
-            <h1>Welcome to Your Dashboard</h1>
-            <p style={{ color: '#64748b', marginTop: '0.5rem' }}>
-              Hello, {user.name || user.email}!
+            <h1 style={{ marginBottom: '0.5rem' }}>Welcome to Virelia, {user.name || user.email}!</h1>
+            <p style={{ color: '#64748b', margin: 0 }}>
+              Connect, share, and grow with our community
             </p>
           </div>
-          <button onClick={handleLogout} className="btn btn-secondary">
-            Logout
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <Notifications />
+            <button onClick={() => navigate('/profile')} className="btn btn-secondary">
+              Profile
+            </button>
+            <button onClick={handleLogout} className="btn btn-secondary">
+              Logout
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation Tabs */}
+      <div style={{ 
+        display: 'flex', 
+        gap: '0.5rem', 
+        marginBottom: '1.5rem',
+        flexWrap: 'wrap'
+      }}>
+        {[
+          { id: 'feed', label: 'í³ Feed' },
+          { id: 'create', label: 'âœ¨ Create Post' },
+          { id: 'friends', label: 'í±¥ Friends' },
+          { id: 'chat', label: 'í²¬ Messages' }
+        ].map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={activeTab === tab.id ? 'btn btn-primary' : 'btn btn-secondary'}
+            style={{ 
+              padding: '0.75rem 1.5rem',
+              fontSize: '0.875rem',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            {tab.label}
           </button>
-        </div>
-        
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
-          gap: '1rem', 
-          marginBottom: '2rem' 
-        }}>
-          <div style={{ 
-            padding: '1.5rem', 
-            background: '#f8fafc', 
-            borderRadius: '0.5rem', 
-            border: '1px solid #e2e8f0' 
-          }}>
-            <h3 style={{ marginBottom: '0.5rem' }}>Profile</h3>
-            <p style={{ color: '#64748b', marginBottom: '1rem' }}>Manage your account settings</p>
-            <button className="btn btn-primary" style={{ width: '100%' }}>
-              Edit Profile
-            </button>
-          </div>
-          
-          <div style={{ 
-            padding: '1.5rem', 
-            background: '#f8fafc', 
-            borderRadius: '0.5rem', 
-            border: '1px solid #e2e8f0' 
-          }}>
-            <h3 style={{ marginBottom: '0.5rem' }}>Friends</h3>
-            <p style={{ color: '#64748b', marginBottom: '1rem' }}>Connect with other users</p>
-            <button className="btn btn-primary" style={{ width: '100%' }}>
-              Find Friends
-            </button>
-          </div>
-          
-          <div style={{ 
-            padding: '1.5rem', 
-            background: '#f8fafc', 
-            borderRadius: '0.5rem', 
-            border: '1px solid #e2e8f0' 
-          }}>
-            <h3 style={{ marginBottom: '0.5rem' }}>Posts</h3>
-            <p style={{ color: '#64748b', marginBottom: '1rem' }}>Create and share content</p>
-            <button className="btn btn-primary" style={{ width: '100%' }}>
-              New Post
-            </button>
-          </div>
-        </div>
+        ))}
+      </div>
 
-        <div style={{ 
-          padding: '1.5rem', 
-          background: '#f0fdf4', 
-          borderRadius: '0.5rem', 
-          border: '1px solid #bbf7d0' 
-        }}>
-          <h3 style={{ color: '#166534', marginBottom: '0.5rem' }}>Getting Started</h3>
-          <p style={{ color: '#15803d' }}>
-            Complete your profile, connect with friends, and start sharing your journey on Virelia!
-          </p>
-        </div>
+      {/* Content Area */}
+      <div>
+        {activeTab === 'feed' && (
+          <div>
+            <CreatePost onPostCreated={handlePostCreated} />
+            <PostsFeed />
+          </div>
+        )}
 
-        {/* Debug info */}
-        <div style={{ 
-          marginTop: '2rem', 
-          padding: '1rem', 
-          background: '#f1f5f9', 
-          borderRadius: '0.5rem', 
-          fontSize: '0.75rem',
-          fontFamily: 'monospace'
-        }}>
-          <strong>Debug Info:</strong>
-          <div>User: {user.email}</div>
-          <div>Token: {localStorage.getItem('token') ? 'Present' : 'Missing'}</div>
-          <div>User ID: {user.id}</div>
-        </div>
+        {activeTab === 'create' && (
+          <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+            <CreatePost onPostCreated={handlePostCreated} />
+          </div>
+        )}
+
+        {activeTab === 'friends' && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' }}>
+            <FriendsList />
+          </div>
+        )}
+
+        {activeTab === 'chat' && (
+          <ChatInterface />
+        )}
+      </div>
+
+      {/* Debug info */}
+      <div style={{ 
+        marginTop: '2rem', 
+        padding: '1rem', 
+        background: '#f1f5f9', 
+        borderRadius: '0.5rem', 
+        fontSize: '0.75rem',
+        fontFamily: 'monospace'
+      }}>
+        <strong>Debug Info:</strong>
+        <div>User: {user.email}</div>
+        <div>Token: {localStorage.getItem('token') ? 'Present' : 'Missing'}</div>
+        <div>Active Tab: {activeTab}</div>
       </div>
     </div>
   )

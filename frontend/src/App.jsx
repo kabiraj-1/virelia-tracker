@@ -14,12 +14,10 @@ const RouteHandler = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    // Handle redirect from URL parameters (fallback for SPA routing)
     const urlParams = new URLSearchParams(window.location.search)
     const redirectPath = urlParams.get('redirect')
     
     if (redirectPath && redirectPath !== location.pathname) {
-      // Replace the current history entry to avoid back button issues
       navigate(redirectPath, { replace: true })
     }
     
@@ -72,7 +70,6 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/profile" element={<Profile />} />
-            {/* Catch all route - must be last */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

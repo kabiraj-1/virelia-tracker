@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import Notifications from './Notifications'
 
 const Navbar = () => {
   const location = useLocation()
@@ -7,7 +8,6 @@ const Navbar = () => {
   const [user, setUser] = useState(null)
 
   useEffect(() => {
-    // Check auth state on component mount and location change
     const checkAuth = () => {
       const userData = localStorage.getItem('user')
       if (userData) {
@@ -26,7 +26,6 @@ const Navbar = () => {
 
     checkAuth()
     
-    // Listen for storage changes (login/logout from other tabs)
     const handleStorageChange = () => {
       checkAuth()
     }
@@ -77,6 +76,7 @@ const Navbar = () => {
         <div className="nav-auth">
           {user ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <Notifications />
               <span style={{ color: '#64748b', fontSize: '0.875rem' }}>
                 Welcome, {user.name || user.email.split('@')[0]}
               </span>
