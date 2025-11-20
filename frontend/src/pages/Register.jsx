@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 
+const API_URL = import.meta.env.VITE_API_URL || 'https://virelia-tracker.onrender.com/api';
+
 const Register = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -8,58 +10,41 @@ const Register = () => {
     password: ''
   })
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
+    setError('')
     console.log('Registration attempt:', formData)
     
     try {
-      // Try multiple backend endpoints
-      const backendUrls = [
-        'https://virelia-tracker.onrender.com/api/auth/register',
-        'https://virelia-tracker.onrender.com/auth/register',
-        'https://virelia-tracker-backend.onrender.com/api/auth/register'
-      ]
-
-      let response = null
-      let lastError = null
-
-      for (const url of backendUrls) {
-        try {
-          console.log('Trying endpoint:', url)
-          response = await fetch(url, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(formData),
-          })
-          
-          if (response.ok) break
-        } catch (error) {
-          console.log('Endpoint failed:', url, error)
-          lastError = error
-          continue
-        }
-      }
-
-      if (!response) {
-        throw new Error('All backend endpoints failed')
-      }
+      const response = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
 
       const data = await response.json()
       console.log('Registration response:', data)
       
       if (response.ok) {
-        alert('Registration successful! Please login.')
-        window.location.href = '/login'
+        // Save token and user data
+        if (data.token) {
+          localStorage.setItem('token', data.token)
+          localStorage.setItem('user', JSON.stringify(data.user))
+        }
+        
+        alert('Registration successful! Welcome to Virelia!')
+        window.location.href = '/dashboard'
       } else {
-        alert('Registration failed: ' + (data.message || 'Unknown error'))
+        setError(data.message || 'Registration failed. Please try again.')
       }
     } catch (error) {
       console.error('Registration error:', error)
-      alert('Registration failed: Network error - Backend might be restarting. Please try again in a moment.')
+      setError('Network error. Please check your connection and try again.')
     } finally {
       setLoading(false)
     }
@@ -70,12 +55,27 @@ const Register = () => {
       ...formData,
       [e.target.name]: e.target.value
     })
+    if (error) setError('')
   }
 
   return (
     <div className="container">
       <div className="form-container">
         <h2 style={{ textAlign: 'center', marginBottom: '2rem' }}>Join Virelia</h2>
+        
+        {error && (
+          <div style={{
+            padding: '1rem',
+            background: '#fee2e2',
+            border: '1px solid #fecaca',
+            borderRadius: '0.5rem',
+            marginBottom: '1rem',
+            color: '#dc2626'
+          }}>
+            {error}
+          </div>
+        )}
+        
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="name">Full Name</label>
@@ -87,6 +87,7 @@ const Register = () => {
               onChange={handleChange}
               required
               disabled={loading}
+              placeholder="Enter your full name"
             />
           </div>
           <div className="form-group">
@@ -99,6 +100,7 @@ const Register = () => {
               onChange={handleChange}
               required
               disabled={loading}
+              placeholder="Enter your email"
             />
           </div>
           <div className="form-group">
@@ -111,6 +113,8 @@ const Register = () => {
               onChange={handleChange}
               required
               disabled={loading}
+              placeholder="Enter your password (min. 6 characters)"
+              minLength="6"
             />
           </div>
           <button 
@@ -125,13 +129,6 @@ const Register = () => {
         <p style={{ textAlign: 'center' }}>
           Already have an account? <Link to="/login">Login here</Link>
         </p>
-        
-        {/* Debug info */}
-        <div style={{ marginTop: '2rem', padding: '1rem', background: '#f1f5f9', borderRadius: '0.5rem', fontSize: '0.875rem' }}>
-          <strong>Debug Info:</strong>
-          <div>Backend: virelia-tracker.onrender.com</div>
-          <div>Status: {loading ? 'Connecting...' : 'Ready'}</div>
-        </div>
       </div>
     </div>
   )

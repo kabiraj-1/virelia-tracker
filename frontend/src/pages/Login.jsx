@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 
+const API_URL = import.meta.env.VITE_API_URL || 'https://virelia-tracker.onrender.com/api';
+
 const Login = () => {
   const [formData, setFormData] = useState({
     email: '',
@@ -16,7 +18,7 @@ const Login = () => {
     console.log('Login attempt:', formData)
     
     try {
-      const response = await fetch('https://virelia-tracker.onrender.com/api/auth/login', {
+      const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -35,7 +37,6 @@ const Login = () => {
         }
         
         alert('Login successful! Welcome back!')
-        // Redirect to dashboard or home page
         window.location.href = '/dashboard'
       } else {
         setError(data.message || 'Login failed. Please check your credentials.')
@@ -53,7 +54,6 @@ const Login = () => {
       ...formData,
       [e.target.name]: e.target.value
     })
-    // Clear error when user starts typing
     if (error) setError('')
   }
 
@@ -117,7 +117,7 @@ const Login = () => {
             Don't have an account? <Link to="/register">Sign up here</Link>
           </p>
           <p style={{ fontSize: '0.875rem', color: '#64748b' }}>
-            For testing: Use your registered credentials
+            Connect, share, and grow with our community
           </p>
         </div>
       </div>
