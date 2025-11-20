@@ -429,3 +429,64 @@ app.listen(PORT, () => {
   console.log(`í¼ Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`â° Started at: ${new Date().toISOString()}`);
 });
+
+// Profile routes
+app.put('/api/auth/profile', async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    const { name, bio, website, location } = req.body;
+
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: 'No token provided'
+      });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+    if (mongoose.connection.readyState === 1) {
+      // Update in MongoDB
+      const user = await User.findByIdAndUpdate(
+        decoded.userId,
+        { name, bio, website, location },
+        { new: true }
+      ).select('-password');
+
+      res.json({
+        success: true,
+        message: 'Profile updated successfully',
+        user
+      });
+    } else {
+      // Update in memory
+      const userIndex = memoryUsers.findIndex(u => u.id == decoded.userId);
+      if (userIndex !== -1) {
+        memoryUsers[userIndex] = {
+          ...memoryUsers[userIndex],
+          name: name || memoryUsers[userIndex].name,
+          bio: bio || memoryUsers[userIndex].bio,
+          website: website || memoryUsers[userIndex].website,
+          location: location || memoryUsers[userIndex].location
+        };
+        
+        res.json({
+          success: true,
+          message: 'Profile updated successfully (in-memory)',
+          user: memoryUsers[userIndex]
+        });
+      } else {
+        res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Profile update error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating profile'
+    });
+  }
+});

@@ -5,6 +5,7 @@ import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
+import Profile from './pages/Profile'
 import BackendStatus from './components/BackendStatus'
 
 // Route Handler Component
@@ -70,6 +71,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/profile" element={<Profile />} />
             {/* Catch all route - must be last */}
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -57,12 +57,20 @@ const Navbar = () => {
             Home
           </Link>
           {user && (
-            <Link 
-              to="/dashboard" 
-              className={`nav-link ${location.pathname === '/dashboard' ? 'active' : ''}`}
-            >
-              Dashboard
-            </Link>
+            <>
+              <Link 
+                to="/dashboard" 
+                className={`nav-link ${location.pathname === '/dashboard' ? 'active' : ''}`}
+              >
+                Dashboard
+              </Link>
+              <Link 
+                to="/profile" 
+                className={`nav-link ${location.pathname === '/profile' ? 'active' : ''}`}
+              >
+                Profile
+              </Link>
+            </>
           )}
         </div>
 
