@@ -1,5 +1,5 @@
-import React from 'react'
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
+import React, { useEffect } from 'react'
+import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Home from './pages/Home'
 import Login from './pages/Login'
@@ -7,9 +7,34 @@ import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import BackendStatus from './components/BackendStatus'
 
+// Route Handler Component
+const RouteHandler = () => {
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    // Handle redirect from URL parameters (fallback for SPA routing)
+    const urlParams = new URLSearchParams(window.location.search)
+    const redirectPath = urlParams.get('redirect')
+    
+    if (redirectPath && redirectPath !== location.pathname) {
+      // Replace the current history entry to avoid back button issues
+      navigate(redirectPath, { replace: true })
+    }
+    
+    console.log('Current route:', location.pathname)
+  }, [location, navigate])
+
+  return null
+}
+
 // 404 Page component
 const NotFound = () => {
   const location = useLocation()
+  const navigate = useNavigate()
+  
+  const goHome = () => navigate('/')
+  const goBack = () => navigate(-1)
   
   return (
     <div className="container">
@@ -24,9 +49,9 @@ const NotFound = () => {
         <p style={{ color: '#64748b', marginBottom: '2rem' }}>
           The page <code>{location.pathname}</code> does not exist.
         </p>
-        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-          <a href="/" className="btn btn-primary">Go Home</a>
-          <a href="/dashboard" className="btn btn-secondary">Dashboard</a>
+        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <button onClick={goBack} className="btn btn-secondary">Go Back</button>
+          <button onClick={goHome} className="btn btn-primary">Go Home</button>
         </div>
       </div>
     </div>
@@ -37,6 +62,7 @@ function App() {
   return (
     <Router>
       <div className="App">
+        <RouteHandler />
         <Navbar />
         <main className="main-content">
           <Routes>

@@ -8,7 +8,9 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
+    // Generate relative paths for better compatibility
+    assetsDir: 'assets',
   },
-  // Critical for SPA routing - serve index.html for all routes
+  // Use relative paths for better SPA support
   base: './',
 })
