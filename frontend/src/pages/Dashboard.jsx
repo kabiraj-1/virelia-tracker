@@ -57,7 +57,7 @@ const Dashboard = () => {
           
           <div style={{ padding: '1.5rem', background: '#f8fafc', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}>
             <h3 style={{ marginBottom: '0.5rem' }}>Friends</h3>
-            <p style={{ color: '#64748b', marginBottom: '1rem' }}Connect with other users</p>
+            <p style={{ color: '#64748b', marginBottom: '1rem' }}>Connect with other users</p>
             <button className="btn btn-primary" style={{ width: '100%' }}>
               Find Friends
             </button>
