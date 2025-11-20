@@ -1,1 +1,0 @@
-// EventList component

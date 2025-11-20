@@ -1,53 +1,63 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import api from '../utils/api';
+import React, { useState } from 'react'
+import { Link } from 'react-router-dom'
 
 const Login = () => {
-  const [formData, setFormData] = useState({ email: '', password: '' });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  })
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const response = await api.auth.login(formData);
-      console.log('Login success:', response);
-      navigate('/profile');
-    } catch (err) {
-      setError(err.message || 'Login failed');
-    } finally {
-      setLoading(false);
-    }
-  };
+    e.preventDefault()
+    console.log('Login attempt:', formData)
+    // Basic login logic here
+    alert('Login functionality will be added soon!')
+  }
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    })
+  }
 
   return (
-    <div style={{ maxWidth: '400px', margin: '2rem auto', padding: '2rem' }}>
-      <h2>Login</h2>
-      {error && <div style={{ color: 'red' }}>{error}</div>}
-      <form onSubmit={handleSubmit}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={(e) => setFormData({...formData, email: e.target.value})}
-          style={{ width: '100%', marginBottom: '1rem', padding: '0.5rem' }}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={(e) => setFormData({...formData, password: e.target.value})}
-          style={{ width: '100%', marginBottom: '1rem', padding: '0.5rem' }}
-        />
-        <button type="submit" disabled={loading} style={{ width: '100%', padding: '0.75rem' }}>
-          {loading ? 'Logging in...' : 'Login'}
-        </button>
-      </form>
-      <p>Don't have an account? <Link to="/register">Sign up</Link></p>
+    <div className="container">
+      <div className="form-container">
+        <h2 style={{ textAlign: 'center', marginBottom: '2rem' }}>Login to Virelia</h2>
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <button type="submit" className="btn btn-primary" style={{ width: '100%', marginBottom: '1rem' }}>
+            Login
+          </button>
+        </form>
+        <p style={{ textAlign: 'center' }}>
+          Don't have an account? <Link to="/register">Sign up here</Link>
+        </p>
+      </div>
     </div>
-  );
-};
+  )
+}
 
-export default Login;
+export default Login

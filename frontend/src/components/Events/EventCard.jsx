@@ -1,1 +1,0 @@
-// EventCard component
