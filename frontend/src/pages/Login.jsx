@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://virelia-tracker.onrender.com/api';
 
@@ -10,6 +10,7 @@ const Login = () => {
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -40,8 +41,8 @@ const Login = () => {
         // Show success message
         alert('Login successful! Redirecting to dashboard...')
         
-        // Force reload to ensure auth state is updated
-        window.location.href = '/dashboard'
+        // Use React Router navigation instead of window.location
+        navigate('/dashboard', { replace: true })
         
       } else {
         setError(data.message || 'Login failed. Please check your credentials.')
