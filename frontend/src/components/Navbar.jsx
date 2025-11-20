@@ -1,23 +1,45 @@
 import React, { useState, useEffect } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 const Navbar = () => {
   const location = useLocation()
+  const navigate = useNavigate()
   const [user, setUser] = useState(null)
 
   useEffect(() => {
-    // Check if user is logged in
-    const userData = localStorage.getItem('user')
-    if (userData) {
-      setUser(JSON.parse(userData))
+    // Check auth state on component mount and location change
+    const checkAuth = () => {
+      const userData = localStorage.getItem('user')
+      if (userData) {
+        try {
+          setUser(JSON.parse(userData))
+        } catch (error) {
+          console.error('Error parsing user data:', error)
+          localStorage.removeItem('token')
+          localStorage.removeItem('user')
+          setUser(null)
+        }
+      } else {
+        setUser(null)
+      }
     }
-  }, [])
+
+    checkAuth()
+    
+    // Listen for storage changes (login/logout from other tabs)
+    const handleStorageChange = () => {
+      checkAuth()
+    }
+
+    window.addEventListener('storage', handleStorageChange)
+    return () => window.removeEventListener('storage', handleStorageChange)
+  }, [location])
 
   const handleLogout = () => {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
     setUser(null)
-    window.location.href = '/'
+    navigate('/')
   }
 
   return (
@@ -47,7 +69,9 @@ const Navbar = () => {
         <div className="nav-auth">
           {user ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <span style={{ color: '#64748b' }}>Hello, {user.name || user.email}</span>
+              <span style={{ color: '#64748b', fontSize: '0.875rem' }}>
+                Welcome, {user.name || user.email.split('@')[0]}
+              </span>
               <button onClick={handleLogout} className="btn btn-secondary">
                 Logout
               </button>

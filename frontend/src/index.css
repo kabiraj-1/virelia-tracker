@@ -161,3 +161,19 @@ body {
   gap: 1rem;
   justify-content: center;
 }
+
+/* Loading spinner animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Debug styles */
+.debug-info {
+  background: #f1f5f9;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  font-family: monospace;
+  font-size: 0.75rem;
+  margin-top: 1rem;
+}

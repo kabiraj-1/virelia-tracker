@@ -29,15 +29,20 @@ const Login = () => {
       const data = await response.json()
       console.log('Login response:', data)
       
-      if (response.ok) {
-        // Save token and user data
-        if (data.token) {
-          localStorage.setItem('token', data.token)
-          localStorage.setItem('user', JSON.stringify(data.user))
-        }
+      if (response.ok && data.token) {
+        // Save token and user data securely
+        localStorage.setItem('token', data.token)
+        localStorage.setItem('user', JSON.stringify(data.user))
         
-        alert('Login successful! Welcome back!')
+        console.log('Token saved:', data.token.substring(0, 20) + '...')
+        console.log('User data saved:', data.user)
+        
+        // Show success message
+        alert('Login successful! Redirecting to dashboard...')
+        
+        // Force reload to ensure auth state is updated
         window.location.href = '/dashboard'
+        
       } else {
         setError(data.message || 'Login failed. Please check your credentials.')
       }
