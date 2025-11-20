@@ -12,10 +12,19 @@ dotenv.config();
 
 const app = express();
 
-// Rate limiting
+// Trust proxy for Render deployment
+app.set('trust proxy', 1);
+
+// Rate limiting with proxy fix
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: {
+    success: false,
+    message: 'Too many requests from this IP, please try again later.'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
 // Middleware
@@ -49,14 +58,21 @@ const userSchema = new mongoose.Schema({
 // Create User model
 const User = mongoose.model('User', userSchema);
 
+// In-memory storage fallback
+let memoryUsers = [];
+let memoryUserId = 1;
+
 // Routes
 app.get('/api/health', (req, res) => {
+  const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+  const storageType = dbStatus === 'connected' ? 'MongoDB' : 'In-memory';
+  
   res.json({
     message: 'Welcome to Virelia Tracker Backend API',
-    documentation: 'https://github.com/Kabiraj1s/virelia-tracker',
-    health: '/api/health',
     status: 'operational',
-    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+    database: dbStatus,
+    storage: storageType,
+    environment: process.env.NODE_ENV || 'development',
     timestamp: new Date().toISOString()
   });
 });
@@ -81,47 +97,87 @@ app.post('/api/auth/register', async (req, res) => {
       });
     }
 
-    // Check if user exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: 'User already exists with this email'
+    // Use MongoDB if connected, otherwise use in-memory
+    if (mongoose.connection.readyState === 1) {
+      console.log('Ì≥ù Attempting MongoDB registration for:', email);
+      
+      // MongoDB registration
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: 'User already exists with this email'
+        });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 12);
+      const user = await User.create({ name, email, password: hashedPassword });
+
+      const token = jwt.sign(
+        { userId: user._id }, 
+        process.env.JWT_SECRET, 
+        { expiresIn: '7d' }
+      );
+
+      console.log('‚úÖ MongoDB registration successful for:', email);
+      
+      res.status(201).json({
+        success: true,
+        message: 'User registered successfully!',
+        token,
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          createdAt: user.createdAt
+        }
+      });
+    } else {
+      console.log('Ì≥ù Using in-memory registration for:', email);
+      
+      // In-memory registration
+      const existingUser = memoryUsers.find(user => user.email === email);
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: 'User already exists with this email'
+        });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 12);
+      const newUser = {
+        id: memoryUserId++,
+        name,
+        email,
+        password: hashedPassword,
+        createdAt: new Date().toISOString()
+      };
+
+      memoryUsers.push(newUser);
+
+      const token = jwt.sign(
+        { userId: newUser.id }, 
+        process.env.JWT_SECRET || 'fallback-secret', 
+        { expiresIn: '7d' }
+      );
+
+      console.log('‚úÖ In-memory registration successful for:', email);
+      
+      res.status(201).json({
+        success: false, // Mark as false to indicate fallback
+        message: 'Registration successful (using temporary storage - MongoDB not connected)',
+        token,
+        user: {
+          id: newUser.id,
+          name: newUser.name,
+          email: newUser.email,
+          createdAt: newUser.createdAt
+        }
       });
     }
 
-    // Hash password
-    const saltRounds = 12;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-    // Create user
-    const user = await User.create({
-      name,
-      email,
-      password: hashedPassword,
-    });
-
-    // Generate token
-    const token = jwt.sign(
-      { userId: user._id }, 
-      process.env.JWT_SECRET, 
-      { expiresIn: '7d' }
-    );
-
-    res.status(201).json({
-      success: true,
-      message: 'User registered successfully',
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        createdAt: user.createdAt
-      }
-    });
-
   } catch (error) {
-    console.error('Registration error:', error);
+    console.error('‚ùå Registration error:', error);
     
     if (error.code === 11000) {
       return res.status(400).json({
@@ -130,10 +186,54 @@ app.post('/api/auth/register', async (req, res) => {
       });
     }
 
-    res.status(500).json({
-      success: false,
-      message: 'Server error during registration'
-    });
+    // If MongoDB fails, fallback to in-memory
+    console.log('Ì¥Ñ Falling back to in-memory registration due to MongoDB error');
+    
+    try {
+      const { name, email, password } = req.body;
+      const existingUser = memoryUsers.find(user => user.email === email);
+      
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: 'User already exists with this email'
+        });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 12);
+      const newUser = {
+        id: memoryUserId++,
+        name,
+        email,
+        password: hashedPassword,
+        createdAt: new Date().toISOString()
+      };
+
+      memoryUsers.push(newUser);
+
+      const token = jwt.sign(
+        { userId: newUser.id }, 
+        process.env.JWT_SECRET || 'fallback-secret', 
+        { expiresIn: '7d' }
+      );
+
+      res.status(201).json({
+        success: false,
+        message: 'Registration successful (fallback mode - MongoDB unavailable)',
+        token,
+        user: {
+          id: newUser.id,
+          name: newUser.name,
+          email: newUser.email,
+          createdAt: newUser.createdAt
+        }
+      });
+    } catch (fallbackError) {
+      res.status(500).json({
+        success: false,
+        message: 'Server error during registration'
+      });
+    }
   }
 });
 
@@ -142,7 +242,6 @@ app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     
-    // Validation
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -150,110 +249,153 @@ app.post('/api/auth/login', async (req, res) => {
       });
     }
 
-    // Find user
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password'
-      });
-    }
-
-    // Check password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password'
-      });
-    }
-
-    // Generate token
-    const token = jwt.sign(
-      { userId: user._id }, 
-      process.env.JWT_SECRET, 
-      { expiresIn: '7d' }
-    );
-
-    res.json({
-      success: true,
-      message: 'Login successful',
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        createdAt: user.createdAt
+    // Try MongoDB first
+    if (mongoose.connection.readyState === 1) {
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          message: 'Invalid email or password'
+        });
       }
-    });
+
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        return res.status(401).json({
+          success: false,
+          message: 'Invalid email or password'
+        });
+      }
+
+      const token = jwt.sign(
+        { userId: user._id }, 
+        process.env.JWT_SECRET, 
+        { expiresIn: '7d' }
+      );
+
+      res.json({
+        success: true,
+        message: 'Login successful!',
+        token,
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          createdAt: user.createdAt
+        }
+      });
+    } else {
+      // Fallback to in-memory
+      const user = memoryUsers.find(u => u.email === email);
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          message: 'Invalid email or password'
+        });
+      }
+
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        return res.status(401).json({
+          success: false,
+          message: 'Invalid email or password'
+        });
+      }
+
+      const token = jwt.sign(
+        { userId: user.id }, 
+        process.env.JWT_SECRET || 'fallback-secret', 
+        { expiresIn: '7d' }
+      );
+
+      res.json({
+        success: false,
+        message: 'Login successful (temporary storage - MongoDB unavailable)',
+        token,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          createdAt: user.createdAt
+        }
+      });
+    }
 
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error during login'
-    });
-  }
-});
-
-// Get user profile (protected route example)
-app.get('/api/auth/me', async (req, res) => {
-  try {
-    const token = req.headers.authorization?.split(' ')[1];
     
-    if (!token) {
-      return res.status(401).json({
+    // Fallback to in-memory on error
+    try {
+      const { email, password } = req.body;
+      const user = memoryUsers.find(u => u.email === email);
+      
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          message: 'Invalid email or password'
+        });
+      }
+
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        return res.status(401).json({
+          success: false,
+          message: 'Invalid email or password'
+        });
+      }
+
+      const token = jwt.sign(
+        { userId: user.id }, 
+        process.env.JWT_SECRET || 'fallback-secret', 
+        { expiresIn: '7d' }
+      );
+
+      res.json({
         success: false,
-        message: 'No token provided'
+        message: 'Login successful (fallback mode)',
+        token,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          createdAt: user.createdAt
+        }
+      });
+    } catch (fallbackError) {
+      res.status(500).json({
+        success: false,
+        message: 'Server error during login'
       });
     }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.userId).select('-password');
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
-
-    res.json({
-      success: true,
-      user
-    });
-
-  } catch (error) {
-    console.error('Auth error:', error);
-    res.status(401).json({
-      success: false,
-      message: 'Invalid token'
-    });
   }
 });
 
-// MongoDB connection
+// MongoDB connection with better error handling and timeout
 const connectDB = async () => {
   try {
     if (!process.env.MONGODB_URI) {
-      throw new Error('MONGODB_URI not found in environment variables');
+      console.log('‚ö†Ô∏è  MONGODB_URI not found - using in-memory storage');
+      return;
     }
 
-    await mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log('‚úÖ Connected to MongoDB Atlas');
+    console.log('Ì¥ó Attempting MongoDB connection...');
     
-    // Create indexes
+    // Increased timeout and better connection options
+    await mongoose.connect(process.env.MONGODB_URI, {
+      serverSelectionTimeoutMS: 30000, // 30 seconds
+      socketTimeoutMS: 45000, // 45 seconds
+    });
+    
+    console.log('‚úÖ Connected to MongoDB Atlas');
     await User.createIndexes();
     console.log('‚úÖ Database indexes created');
     
   } catch (error) {
     console.error('‚ùå MongoDB connection failed:', error.message);
-    console.log('Ì≤° Please check your MONGODB_URI in environment variables');
-    console.log('Ì≤° Make sure your IP is whitelisted in MongoDB Atlas');
-    process.exit(1);
+    console.log('ÔøΩÔøΩ Using in-memory storage as fallback');
+    console.log('Ì¥ß To fix: Whitelist Render IP in MongoDB Atlas Network Access');
+    console.log('   - Go to MongoDB Atlas ‚Üí Network Access ‚Üí Add IP Address');
+    console.log('   - Add 0.0.0.0/0 to allow all IPs (or specific Render IP ranges)');
   }
 };
 
@@ -281,8 +423,9 @@ app.use('*', (req, res) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Ì∫Ä Server is running on port ${PORT}`);
-  console.log(`Ì≥ä Health check: http://localhost:${PORT}/api/health`);
-  console.log(`Ì∑ÑÔ∏è  Database: MongoDB Atlas`);
-  console.log(`Ì¥ê JWT Secret: ${process.env.JWT_SECRET ? 'Set' : 'Not set'}`);
+  console.log(`Ì≥ä Health check: https://virelia-tracker.onrender.com/api/health`);
+  console.log(`Ì∑ÑÔ∏è  Database: ${mongoose.connection.readyState === 1 ? 'MongoDB Atlas' : 'In-memory (fallback)'}`);
+  console.log(`Ì¥ê JWT: ${process.env.JWT_SECRET ? 'Custom secret' : 'Fallback secret'}`);
+  console.log(`Ìºç Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`‚è∞ Started at: ${new Date().toISOString()}`);
 });
