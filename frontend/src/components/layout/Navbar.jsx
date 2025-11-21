@@ -31,32 +31,37 @@ const Navbar = () => {
         </h1>
         
         {user && (
-          <div style={{ display: 'flex', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', gap: '1rem' }}>
             <a href="#feed" style={{ 
               color: 'white', 
               textDecoration: 'none',
               padding: '0.5rem 1rem',
-              borderRadius: '0.375rem',
-              background: '#2d3748'
+              borderRadius: '0.375rem'
             }}>Feed</a>
-            <a href="#profile" style={{ 
-              color: 'white', 
-              textDecoration: 'none',
-              padding: '0.5rem 1rem',
-              borderRadius: '0.375rem'
-            }}>Profile</a>
-            <a href="#chat" style={{ 
-              color: 'white', 
-              textDecoration: 'none',
-              padding: '0.5rem 1rem',
-              borderRadius: '0.375rem'
-            }}>Messages</a>
             <a href="#friends" style={{ 
               color: 'white', 
               textDecoration: 'none',
               padding: '0.5rem 1rem',
               borderRadius: '0.375rem'
             }}>Friends</a>
+            <a href="#activity" style={{ 
+              color: 'white', 
+              textDecoration: 'none',
+              padding: '0.5rem 1rem',
+              borderRadius: '0.375rem'
+            }}>Activity</a>
+            <a href="#goals" style={{ 
+              color: 'white', 
+              textDecoration: 'none',
+              padding: '0.5rem 1rem',
+              borderRadius: '0.375rem'
+            }}>Goals</a>
+            <a href="#chat" style={{ 
+              color: 'white', 
+              textDecoration: 'none',
+              padding: '0.5rem 1rem',
+              borderRadius: '0.375rem'
+            }}>Chat</a>
           </div>
         )}
       </div>

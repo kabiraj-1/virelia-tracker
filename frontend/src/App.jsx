@@ -1,8 +1,7 @@
 import React from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Navbar from './components/layout/Navbar';
-import Feed from './components/feed/Feed';
-import ChatWidget from './components/chat/ChatWidget';
+import Router from './components/Router';
 
 const AppContent = () => {
   const { user, loading } = useAuth();
@@ -48,10 +47,7 @@ const AppContent = () => {
       <Navbar />
       
       {user ? (
-        <>
-          <Feed />
-          <ChatWidget />
-        </>
+        <Router />
       ) : (
         <div style={{
           display: 'flex',
