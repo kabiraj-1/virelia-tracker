@@ -1,0 +1,10 @@
+.communities {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.empty-communities {
+  text-align: center;
+  padding: 60px 20px;
+}

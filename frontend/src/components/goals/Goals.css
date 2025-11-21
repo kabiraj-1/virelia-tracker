@@ -1,0 +1,10 @@
+.goals {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.empty-goals {
+  text-align: center;
+  padding: 60px 20px;
+}

@@ -1,164 +1,99 @@
-import React, { useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+import React, { useContext, useState } from 'react';
+import { AuthContext } from '../../contexts/AuthContext';
+import './Feed.css';
 
 const Feed = () => {
-  const { user } = useAuth();
-  const [posts, setPosts] = useState([
-    {
-      id: 1,
-      user: { name: 'Alex Johnson', avatar: null },
-      content: 'Just completed my daily productivity goal! ÌæØ',
-      timestamp: '2 hours ago',
-      likes: 12,
-      comments: 3,
-      isLiked: false
-    },
-    {
-      id: 2,
-      user: { name: 'Sarah Chen', avatar: null },
-      content: 'Working on a new feature for our social tracker. So excited! Ì≤ª',
-      timestamp: '4 hours ago',
-      likes: 8,
-      comments: 1,
-      isLiked: true
-    }
-  ]);
-
+  const { user } = useContext(AuthContext);
+  const [posts, setPosts] = useState([]);
   const [newPost, setNewPost] = useState('');
 
-  const handleLike = (postId) => {
-    setPosts(posts.map(post => 
-      post.id === postId 
-        ? { 
-            ...post, 
-            likes: post.isLiked ? post.likes - 1 : post.likes + 1,
-            isLiked: !post.isLiked
-          }
-        : post
-    ));
-  };
-
-  const handleAddPost = () => {
-    if (newPost.trim()) {
-      const post = {
-        id: Date.now(),
-        user: { name: user.name, avatar: null },
-        content: newPost,
-        timestamp: 'Just now',
-        likes: 0,
-        comments: 0,
-        isLiked: false
-      };
-      setPosts([post, ...posts]);
-      setNewPost('');
-    }
+  const handlePostSubmit = (e) => {
+    e.preventDefault();
+    if (!newPost.trim()) return;
+    
+    // TODO: Connect to backend API
+    const post = {
+      id: Date.now(),
+      content: newPost,
+      author: user?.name || 'User',
+      timestamp: new Date().toISOString(),
+      likes: 0,
+      comments: []
+    };
+    
+    setPosts([post, ...posts]);
+    setNewPost('');
   };
 
   return (
-    <div style={{ 
-      maxWidth: '600px', 
-      margin: '0 auto', 
-      padding: '2rem',
-      color: 'white'
-    }}>
+    <div className="feed">
+      <div className="feed-header">
+        <h1>Feed Ì≥ù</h1>
+        <p>Share updates and see what others are working on</p>
+      </div>
+
       {/* Create Post */}
-      <div style={{
-        background: '#2d3748',
-        padding: '1.5rem',
-        borderRadius: '0.5rem',
-        marginBottom: '2rem'
-      }}>
-        <textarea
-          value={newPost}
-          onChange={(e) => setNewPost(e.target.value)}
-          placeholder="What's on your mind?"
-          style={{
-            width: '100%',
-            minHeight: '80px',
-            background: '#4a5568',
-            border: 'none',
-            borderRadius: '0.375rem',
-            padding: '1rem',
-            color: 'white',
-            resize: 'vertical'
-          }}
-        />
-        <button
-          onClick={handleAddPost}
-          style={{
-            marginTop: '1rem',
-            padding: '0.5rem 1.5rem',
-            background: '#6366f1',
-            color: 'white',
-            border: 'none',
-            borderRadius: '0.375rem',
-            cursor: 'pointer'
-          }}
-        >
-          Post
-        </button>
+      <div className="create-post">
+        <div className="post-header">
+          <div className="user-avatar">
+            {user?.name?.charAt(0) || 'U'}
+          </div>
+          <div className="post-input">
+            <form onSubmit={handlePostSubmit}>
+              <textarea
+                value={newPost}
+                onChange={(e) => setNewPost(e.target.value)}
+                placeholder="What's on your mind?"
+                rows="3"
+              />
+              <button type="submit" className="post-btn">
+                Post
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
 
       {/* Posts Feed */}
-      {posts.map(post => (
-        <div key={post.id} style={{
-          background: '#2d3748',
-          padding: '1.5rem',
-          borderRadius: '0.5rem',
-          marginBottom: '1rem'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem' }}>
-            <div style={{
-              width: '40px',
-              height: '40px',
-              background: '#6366f1',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginRight: '1rem',
-              color: 'white',
-              fontWeight: 'bold'
-            }}>
-              {post.user.name.charAt(0)}
-            </div>
-            <div>
-              <div style={{ fontWeight: 'bold' }}>{post.user.name}</div>
-              <div style={{ color: '#a0aec0', fontSize: '0.875rem' }}>{post.timestamp}</div>
+      <div className="posts-feed">
+        {posts.length === 0 ? (
+          <div className="empty-feed">
+            <div className="empty-icon">Ì≥ù</div>
+            <h3>No posts yet</h3>
+            <p>Be the first to share an update! Post about your progress, goals, or achievements.</p>
+            <div className="post-suggestions">
+              <h4>What to share:</h4>
+              <ul>
+                <li>Completed goals or milestones</li>
+                <li>Current projects you're working on</li>
+                <li>Productivity tips and insights</li>
+                <li>Challenges you're overcoming</li>
+              </ul>
             </div>
           </div>
-
-          <p style={{ marginBottom: '1rem', lineHeight: '1.5' }}>{post.content}</p>
-
-          <div style={{ display: 'flex', gap: '1rem', color: '#a0aec0' }}>
-            <button
-              onClick={() => handleLike(post.id)}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: post.isLiked ? '#6366f1' : '#a0aec0',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem'
-              }}
-            >
-              ‚ù§Ô∏è {post.likes}
-            </button>
-            <button style={{
-              background: 'none',
-              border: 'none',
-              color: '#a0aec0',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}>
-              Ì≤¨ {post.comments}
-            </button>
-          </div>
-        </div>
-      ))}
+        ) : (
+          posts.map(post => (
+            <div key={post.id} className="post-card">
+              <div className="post-header">
+                <div className="user-avatar">
+                  {post.author.charAt(0)}
+                </div>
+                <div className="post-info">
+                  <h4>{post.author}</h4>
+                  <span>{new Date(post.timestamp).toLocaleDateString()}</span>
+                </div>
+              </div>
+              <div className="post-content">
+                <p>{post.content}</p>
+              </div>
+              <div className="post-actions">
+                <button className="like-btn">‚ù§Ô∏è {post.likes}</button>
+                <button className="comment-btn">Ì≤¨ {post.comments.length}</button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 };

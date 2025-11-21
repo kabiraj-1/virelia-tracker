@@ -1,0 +1,23 @@
+.feed {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.feed-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.empty-feed {
+  text-align: center;
+  padding: 60px 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+}

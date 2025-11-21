@@ -1,119 +1,96 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Navbar from './components/layout/Navbar';
-import Router from './components/Router';
 import LoginForm from './components/auth/LoginForm';
 import RegisterForm from './components/auth/RegisterForm';
+import Dashboard from './components/dashboard/Dashboard';
+import Feed from './components/feed/Feed';
+import Friends from './components/friends/Friends';
+import Activities from './components/activities/Activities';
+import Goals from './components/goals/Goals';
+import Communities from './components/communities/Communities';
+import Analytics from './components/analytics/Analytics';
+import './App.css';
 
-const AppContent = () => {
+const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
-  const [authMode, setAuthMode] = useState('login'); // 'login' or 'register'
-
+  
   if (loading) {
-    return (
-      <div style={{
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #1a202c 0%, #2d3748 100%)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: 'white'
-      }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{
-            width: '50px',
-            height: '50px',
-            border: '4px solid #ffffff33',
-            borderTop: '4px solid white',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite',
-            margin: '0 auto 1rem'
-          }}></div>
-          <p>Loading Virelia Tracker...</p>
-        </div>
-        <style>{`
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        `}</style>
-      </div>
-    );
+    return <div className="loading">Loading...</div>;
   }
+  
+  return user ? children : <Navigate to="/login" />;
+};
 
-  return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #1a202c 0%, #2d3748 100%)',
-      color: 'white'
-    }}>
-      {user ? (
-        <>
-          <Navbar />
-          <Router />
-        </>
-      ) : (
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '100vh',
-          padding: '2rem'
-        }}>
-          <div style={{
-            textAlign: 'center',
-            maxWidth: '500px',
-            width: '100%'
-          }}>
-            <h1 style={{
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              fontSize: '3rem',
-              marginBottom: '1rem'
-            }}>
-              íº€ Virelia Tracker
-            </h1>
-            
-            <p style={{ 
-              color: '#a0aec0', 
-              fontSize: '1.2rem',
-              marginBottom: '2rem'
-            }}>
-              Your social productivity companion. Track goals, share progress, and connect with friends.
-            </p>
-
-            {authMode === 'login' ? (
-              <LoginForm onToggleMode={() => setAuthMode('register')} />
-            ) : (
-              <RegisterForm onToggleMode={() => setAuthMode('login')} />
-            )}
-
-            <div style={{ 
-              marginTop: '2rem', 
-              paddingTop: '2rem', 
-              borderTop: '1px solid #4a5568' 
-            }}>
-              <p style={{ 
-                color: '#718096', 
-                fontSize: '0.875rem',
-                lineHeight: '1.5'
-              }}>
-                Join thousands of productivity enthusiasts tracking their goals, 
-                sharing progress, and building better habits together.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+const PublicRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  
+  if (loading) {
+    return <div className="loading">Loading...</div>;
+  }
+  
+  return !user ? children : <Navigate to="/dashboard" />;
 };
 
 function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <Router>
+        <div className="App">
+          <Navbar />
+          <main className="main-content">
+            <Routes>
+              <Route path="/login" element={
+                <PublicRoute>
+                  <LoginForm />
+                </PublicRoute>
+              } />
+              <Route path="/register" element={
+                <PublicRoute>
+                  <RegisterForm />
+                </PublicRoute>
+              } />
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/feed" element={
+                <ProtectedRoute>
+                  <Feed />
+                </ProtectedRoute>
+              } />
+              <Route path="/friends" element={
+                <ProtectedRoute>
+                  <Friends />
+                </ProtectedRoute>
+              } />
+              <Route path="/activities" element={
+                <ProtectedRoute>
+                  <Activities />
+                </ProtectedRoute>
+              } />
+              <Route path="/goals" element={
+                <ProtectedRoute>
+                  <Goals />
+                </ProtectedRoute>
+              } />
+              <Route path="/communities" element={
+                <ProtectedRoute>
+                  <Communities />
+                </ProtectedRoute>
+              } />
+              <Route path="/analytics" element={
+                <ProtectedRoute>
+                  <Analytics />
+                </ProtectedRoute>
+              } />
+              <Route path="/" element={<Navigate to="/dashboard" />} />
+            </Routes>
+          </main>
+        </div>
+      </Router>
     </AuthProvider>
   );
 }
