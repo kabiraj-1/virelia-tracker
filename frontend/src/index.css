@@ -1,4 +1,4 @@
-/* ===== EMERGENCY STYLES - ENSURES APP IS VISIBLE ===== */
+/* ===== CRITICAL STYLES - ENSURES VISIBLE APP ===== */
 * {
   margin: 0;
   padding: 0;
@@ -11,72 +11,24 @@ html, body, #root {
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%) !important;
   color: white !important;
   margin: 0;
   padding: 0;
   min-height: 100vh;
+  line-height: 1.6;
 }
 
 #root {
   min-height: 100vh;
-  background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
 }
 
-/* Emergency app container */
-.app-container {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
-  color: white;
-  padding: 2rem;
-}
-
-/* Logo styles */
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-/* Button styles */
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #6366f1;
-  color: white;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  background-color: #4f46e5;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-/* Card styles */
-.card {
-  padding: 2em;
-}
-
-/* Read the docs */
-.read-the-docs {
-  color: #888;
-}
-
-/* Animation */
+/* Logo spin animation */
 @keyframes logo-spin {
   from {
     transform: rotate(0deg);
@@ -86,8 +38,15 @@ button:focus-visible {
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+/* Focus styles for accessibility */
+button:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  body {
+    padding: 1rem;
   }
 }
