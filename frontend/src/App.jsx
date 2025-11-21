@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Navbar from './components/layout/Navbar';
 import Router from './components/Router';
+import LoginForm from './components/auth/LoginForm';
+import RegisterForm from './components/auth/RegisterForm';
 
 const AppContent = () => {
   const { user, loading } = useAuth();
+  const [authMode, setAuthMode] = useState('login'); // 'login' or 'register'
 
   if (loading) {
     return (
@@ -44,81 +47,60 @@ const AppContent = () => {
       background: 'linear-gradient(135deg, #1a202c 0%, #2d3748 100%)',
       color: 'white'
     }}>
-      <Navbar />
-      
       {user ? (
-        <Router />
+        <>
+          <Navbar />
+          <Router />
+        </>
       ) : (
         <div style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          minHeight: 'calc(100vh - 80px)',
+          minHeight: '100vh',
           padding: '2rem'
         }}>
           <div style={{
-            background: '#2d3748',
-            padding: '2rem',
-            borderRadius: '0.5rem',
-            maxWidth: '400px',
-            width: '100%',
-            textAlign: 'center'
+            textAlign: 'center',
+            maxWidth: '500px',
+            width: '100%'
           }}>
-            <h2 style={{
-              marginBottom: '2rem',
+            <h1 style={{
               background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
-              fontSize: '2rem'
+              fontSize: '3rem',
+              marginBottom: '1rem'
             }}>
               íº€ Virelia Tracker
-            </h2>
+            </h1>
             
-            <p style={{ marginBottom: '2rem', color: '#a0aec0' }}>
+            <p style={{ 
+              color: '#a0aec0', 
+              fontSize: '1.2rem',
+              marginBottom: '2rem'
+            }}>
               Your social productivity companion. Track goals, share progress, and connect with friends.
             </p>
 
-            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-              <button 
-                onClick={() => {
-                  // Mock login for demo
-                  const mockUser = {
-                    id: 1,
-                    name: 'Demo User',
-                    email: 'demo@virelia.com'
-                  };
-                  localStorage.setItem('virelia_user', JSON.stringify(mockUser));
-                  window.location.reload();
-                }}
-                style={{
-                  padding: '0.75rem 1.5rem',
-                  background: '#6366f1',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '0.375rem',
-                  cursor: 'pointer',
-                  fontSize: '1rem',
-                  fontWeight: '600'
-                }}
-              >
-                Try Demo
-              </button>
-              <button style={{
-                padding: '0.75rem 1.5rem',
-                background: 'transparent',
-                color: 'white',
-                border: '1px solid #6366f1',
-                borderRadius: '0.375rem',
-                cursor: 'pointer',
-                fontSize: '1rem'
-              }}>
-                Learn More
-              </button>
-            </div>
+            {authMode === 'login' ? (
+              <LoginForm onToggleMode={() => setAuthMode('register')} />
+            ) : (
+              <RegisterForm onToggleMode={() => setAuthMode('login')} />
+            )}
 
-            <div style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid #4a5568' }}>
-              <p style={{ color: '#718096', fontSize: '0.875rem' }}>
-                Join our community of productivity enthusiasts
+            <div style={{ 
+              marginTop: '2rem', 
+              paddingTop: '2rem', 
+              borderTop: '1px solid #4a5568' 
+            }}>
+              <p style={{ 
+                color: '#718096', 
+                fontSize: '0.875rem',
+                lineHeight: '1.5'
+              }}>
+                Join thousands of productivity enthusiasts tracking their goals, 
+                sharing progress, and building better habits together.
               </p>
             </div>
           </div>

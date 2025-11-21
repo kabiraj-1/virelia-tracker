@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { apiService } from '../services/api.js';
 
 const AuthContext = createContext();
 
@@ -13,54 +14,74 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Check if user is logged in (from localStorage or API)
-    const savedUser = localStorage.getItem('virelia_user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
-    setLoading(false);
+    checkAuthStatus();
   }, []);
 
-  const login = async (email, password) => {
-    // Mock login - replace with actual API call
-    const mockUser = {
-      id: 1,
-      email: email,
-      name: 'Demo User',
-      avatar: null,
-      bio: 'Social tracker enthusiast',
-      joinedAt: new Date().toISOString()
-    };
-    
-    setUser(mockUser);
-    localStorage.setItem('virelia_user', JSON.stringify(mockUser));
-    return mockUser;
+  const checkAuthStatus = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        apiService.setToken(token);
+        const response = await apiService.getCurrentUser();
+        setUser(response.data.user);
+      }
+    } catch (error) {
+      console.error('Auth check failed:', error);
+      localStorage.removeItem('authToken');
+      apiService.setToken(null);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const register = async (userData) => {
-    // Mock registration - replace with actual API
-    const newUser = {
-      id: Date.now(),
-      ...userData,
-      joinedAt: new Date().toISOString()
-    };
-    
-    setUser(newUser);
-    localStorage.setItem('virelia_user', JSON.stringify(newUser));
-    return newUser;
+    try {
+      setError(null);
+      const response = await apiService.register(userData);
+      
+      if (response.status === 'success') {
+        apiService.setToken(response.token);
+        setUser(response.data.user);
+        return response;
+      }
+    } catch (error) {
+      setError(error.message);
+      throw error;
+    }
+  };
+
+  const login = async (email, password) => {
+    try {
+      setError(null);
+      const response = await apiService.login({ email, password });
+      
+      if (response.status === 'success') {
+        apiService.setToken(response.token);
+        setUser(response.data.user);
+        return response;
+      }
+    } catch (error) {
+      setError(error.message);
+      throw error;
+    }
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('virelia_user');
+    setError(null);
+    apiService.setToken(null);
+    localStorage.removeItem('authToken');
   };
 
   const updateProfile = (updatedData) => {
-    const updatedUser = { ...user, ...updatedData };
-    setUser(updatedUser);
-    localStorage.setItem('virelia_user', JSON.stringify(updatedUser));
+    setUser(prev => ({ ...prev, ...updatedData }));
+  };
+
+  const clearError = () => {
+    setError(null);
   };
 
   const value = {
@@ -69,7 +90,9 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     updateProfile,
-    loading
+    loading,
+    error,
+    clearError
   };
 
   return (

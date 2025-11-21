@@ -7,7 +7,6 @@ const Navbar = () => {
 
   const handleLogout = () => {
     logout();
-    window.location.reload();
   };
 
   return (
@@ -88,9 +87,9 @@ const Navbar = () => {
             fontWeight: 'bold',
             fontSize: '0.875rem'
           }}>
-            {user.name.charAt(0)}
+            {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
           </div>
-          <span>Hi, {user.name.split(' ')[0]}!</span>
+          <span>Hi, {user.name ? user.name.split(' ')[0] : 'User'}!</span>
           <button
             onClick={handleLogout}
             style={{
@@ -108,26 +107,28 @@ const Navbar = () => {
         </div>
       ) : (
         <div style={{ display: 'flex', gap: '1rem' }}>
-          <button style={{
+          <a href="#login" style={{
             padding: '0.5rem 1rem',
             background: 'transparent',
             color: 'white',
             border: '1px solid white',
             borderRadius: '0.375rem',
-            cursor: 'pointer'
+            cursor: 'pointer',
+            textDecoration: 'none'
           }}>
             Login
-          </button>
-          <button style={{
+          </a>
+          <a href="#register" style={{
             padding: '0.5rem 1rem',
             background: '#6366f1',
             color: 'white',
             border: 'none',
             borderRadius: '0.375rem',
-            cursor: 'pointer'
+            cursor: 'pointer',
+            textDecoration: 'none'
           }}>
             Sign Up
-          </button>
+          </a>
         </div>
       )}
     </nav>
