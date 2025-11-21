@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import Notifications from '../notifications/Notifications';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -31,7 +32,7 @@ const Navbar = () => {
         </h1>
         
         {user && (
-          <div style={{ display: 'flex', gap: '1rem' }}>
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
             <a href="#feed" style={{ 
               color: 'white', 
               textDecoration: 'none',
@@ -56,18 +57,25 @@ const Navbar = () => {
               padding: '0.5rem 1rem',
               borderRadius: '0.375rem'
             }}>Goals</a>
-            <a href="#chat" style={{ 
+            <a href="#communities" style={{ 
               color: 'white', 
               textDecoration: 'none',
               padding: '0.5rem 1rem',
               borderRadius: '0.375rem'
-            }}>Chat</a>
+            }}>Communities</a>
+            <a href="#analytics" style={{ 
+              color: 'white', 
+              textDecoration: 'none',
+              padding: '0.5rem 1rem',
+              borderRadius: '0.375rem'
+            }}>Analytics</a>
           </div>
         )}
       </div>
 
       {user ? (
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <Notifications />
           <div style={{
             width: '35px',
             height: '35px',

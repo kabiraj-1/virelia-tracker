@@ -4,6 +4,9 @@ import Feed from './feed/Feed';
 import FriendsList from './friends/FriendsList';
 import ActivityDashboard from './activity/ActivityDashboard';
 import GoalTracker from './goals/GoalTracker';
+import Notifications from './notifications/Notifications';
+import Communities from './groups/Communities';
+import AdvancedAnalytics from './analytics/AdvancedAnalytics';
 import ChatWidget from './chat/ChatWidget';
 
 const Router = () => {
@@ -14,7 +17,10 @@ const Router = () => {
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#', '');
-      if (hash && ['feed', 'friends', 'activity', 'goals', 'chat'].includes(hash)) {
+      if (hash && [
+        'feed', 'friends', 'activity', 'goals', 'notifications', 
+        'communities', 'analytics', 'chat'
+      ].includes(hash)) {
         setCurrentView(hash);
       }
     };
@@ -32,6 +38,9 @@ const Router = () => {
       {currentView === 'friends' && <FriendsList />}
       {currentView === 'activity' && <ActivityDashboard />}
       {currentView === 'goals' && <GoalTracker />}
+      {currentView === 'notifications' && <Notifications />}
+      {currentView === 'communities' && <Communities />}
+      {currentView === 'analytics' && <AdvancedAnalytics />}
       {currentView === 'chat' && <div>Chat View - Coming Soon</div>}
       <ChatWidget />
     </>
