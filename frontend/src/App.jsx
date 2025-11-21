@@ -2,7 +2,6 @@ import React from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Navbar from './components/layout/Navbar';
 import Feed from './components/feed/Feed';
-import LoginForm from './components/auth/LoginForm';
 
 const AppContent = () => {
   const { user, loading } = useAuth();
@@ -62,33 +61,47 @@ const AppContent = () => {
             padding: '2rem',
             borderRadius: '0.5rem',
             maxWidth: '400px',
-            width: '100%'
+            width: '100%',
+            textAlign: 'center'
           }}>
             <h2 style={{
-              textAlign: 'center',
               marginBottom: '2rem',
               background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
               WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent'
+              WebkitTextFillColor: 'transparent',
+              fontSize: '2rem'
             }}>
-              Welcome to Virelia Tracker
+              íº€ Virelia Tracker
             </h2>
             
-            <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-              <p>Join our social productivity community!</p>
-            </div>
+            <p style={{ marginBottom: '2rem', color: '#a0aec0' }}>
+              Your social productivity companion. Track goals, share progress, and connect with friends.
+            </p>
 
-            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-              <button style={{
-                padding: '0.75rem 1.5rem',
-                background: '#6366f1',
-                color: 'white',
-                border: 'none',
-                borderRadius: '0.375rem',
-                cursor: 'pointer',
-                fontSize: '1rem'
-              }}>
-                Get Started
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <button 
+                onClick={() => {
+                  // Mock login for demo
+                  const mockUser = {
+                    id: 1,
+                    name: 'Demo User',
+                    email: 'demo@virelia.com'
+                  };
+                  localStorage.setItem('virelia_user', JSON.stringify(mockUser));
+                  window.location.reload();
+                }}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  background: '#6366f1',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '0.375rem',
+                  cursor: 'pointer',
+                  fontSize: '1rem',
+                  fontWeight: '600'
+                }}
+              >
+                Try Demo
               </button>
               <button style={{
                 padding: '0.75rem 1.5rem',
@@ -101,6 +114,12 @@ const AppContent = () => {
               }}>
                 Learn More
               </button>
+            </div>
+
+            <div style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid #4a5568' }}>
+              <p style={{ color: '#718096', fontSize: '0.875rem' }}>
+                Join our community of productivity enthusiasts
+              </p>
             </div>
           </div>
         </div>
