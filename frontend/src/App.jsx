@@ -1,82 +1,117 @@
-import React, { useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom'
-import Navbar from './components/Navbar'
-import Home from './pages/Home'
-import Login from './pages/Login'
-import Register from './pages/Register'
-import Dashboard from './pages/Dashboard'
-import Profile from './pages/Profile'
-import BackendStatus from './components/BackendStatus'
+import React from 'react'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 
-// Route Handler Component
-const RouteHandler = () => {
-  const location = useLocation()
-  const navigate = useNavigate()
-
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search)
-    const redirectPath = urlParams.get('redirect')
-    
-    if (redirectPath && redirectPath !== location.pathname) {
-      navigate(redirectPath, { replace: true })
-    }
-    
-    console.log('Current route:', location.pathname)
-  }, [location, navigate])
-
-  return null
-}
-
-// 404 Page component
-const NotFound = () => {
-  const location = useLocation()
-  const navigate = useNavigate()
-  
-  const goHome = () => navigate('/')
-  const goBack = () => navigate(-1)
-  
+// Simple Home component for testing
+const Home = () => {
   return (
-    <div className="container">
-      <div style={{ 
-        textAlign: 'center', 
-        padding: '4rem 1rem',
-        maxWidth: '500px',
-        margin: '0 auto'
-      }}>
-        <h1 style={{ fontSize: '4rem', color: '#6366f1', marginBottom: '1rem' }}>404</h1>
-        <h2 style={{ marginBottom: '1rem' }}>Page Not Found</h2>
-        <p style={{ color: '#64748b', marginBottom: '2rem' }}>
-          The page <code>{location.pathname}</code> does not exist.
-        </p>
-        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button onClick={goBack} className="btn btn-secondary">Go Back</button>
-          <button onClick={goHome} className="btn btn-primary">Go Home</button>
-        </div>
+    <div style={{ 
+      padding: '2rem', 
+      textAlign: 'center',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      color: 'white',
+      minHeight: '100vh'
+    }}>
+      <h1>Virelia Tracker - Debug Mode</h1>
+      <p>If you can see this, React is working!</p>
+      <div style={{ marginTop: '2rem' }}>
+        <button 
+          onClick={() => alert('JavaScript is working!')}
+          style={{
+            padding: '1rem 2rem',
+            background: 'white',
+            color: '#6366f1',
+            border: 'none',
+            borderRadius: '0.5rem',
+            fontSize: '1.1rem',
+            cursor: 'pointer'
+          }}
+        >
+          Test JavaScript
+        </button>
       </div>
     </div>
   )
 }
 
+// Simple 404 page
+const NotFound = () => {
+  return (
+    <div style={{ padding: '2rem', textAlign: 'center' }}>
+      <h1>404 - Page Not Found</h1>
+    </div>
+  )
+}
+
 function App() {
+  console.log('íº€ App component mounted - React is working!')
+  
   return (
     <Router>
       <div className="App">
-        <RouteHandler />
-        <Navbar />
-        <main className="main-content">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </main>
-        <BackendStatus />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Home />} />
+          <Route path="/register" element={<Home />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
       </div>
     </Router>
   )
 }
 
-export default App
+// Add error boundary for better error handling
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = { hasError: false, error: null }
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error }
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('Error caught by boundary:', error, errorInfo)
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ 
+          padding: '2rem', 
+          textAlign: 'center',
+          background: '#fee2e2',
+          color: '#dc2626',
+          minHeight: '100vh'
+        }}>
+          <h1>Something went wrong</h1>
+          <p>Error: {this.state.error?.message}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            style={{
+              padding: '0.75rem 1.5rem',
+              background: '#dc2626',
+              color: 'white',
+              border: 'none',
+              borderRadius: '0.5rem',
+              cursor: 'pointer'
+            }}
+          >
+            Reload Page
+          </button>
+        </div>
+      )
+    }
+
+    return this.props.children
+  }
+}
+
+// Wrap App with ErrorBoundary
+export default function AppWithErrorBoundary() {
+  return (
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
+  )
+}

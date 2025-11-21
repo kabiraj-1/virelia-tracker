@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virelia - Diagnostic Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 2rem;
+            background: #1a202c;
+            color: white;
+            min-height: 100vh;
+        }
+        .test-section {
+            background: #2d3748;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+            border-left: 4px solid #4a5568;
+        }
+        .success { border-left-color: #48bb78; }
+        .error { border-left-color: #f56565; }
+        .warning { border-left-color: #ed8936; }
+        button {
+            padding: 0.75rem 1.5rem;
+            background: #6366f1;
+            color: white;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            margin: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>��� Virelia Diagnostic Tests</h1>
+    
+    <div class="test-section" id="htmlTest">
+        <h3>1. HTML & CSS Test</h3>
+        <p>If you can see this section, HTML and CSS are loading.</p>
+        <div id="htmlStatus">✅ HTML/CSS Working</div>
+    </div>
+
+    <div class="test-section" id="jsTest">
+        <h3>2. JavaScript Test</h3>
+        <p>Click the button to test JavaScript:</p>
+        <button onclick="testJavaScript()">Test JavaScript</button>
+        <div id="jsStatus">Waiting for test...</div>
+    </div>
+
+    <div class="test-section" id="reactTest">
+        <h3>3. React App Test</h3>
+        <p>Checking if React app loads...</p>
+        <div id="reactStatus">Testing...</div>
+    </div>
+
+    <div class="test-section" id="networkTest">
+        <h3>4. Network Test</h3>
+        <p>Checking if main JavaScript file loads...</p>
+        <div id="networkStatus">Testing...</div>
+    </div>
+
+    <script>
+        // Test 2: JavaScript
+        function testJavaScript() {
+            document.getElementById('jsStatus').innerHTML = '✅ JavaScript is working!';
+            document.getElementById('jsStatus').parentElement.className = 'test-section success';
+        }
+
+        // Test 3: React App
+        function checkReactApp() {
+            const rootElement = document.getElementById('root');
+            if (rootElement && rootElement.children.length > 0) {
+                document.getElementById('reactStatus').innerHTML = '✅ React app is loaded and rendered';
+                document.getElementById('reactStatus').parentElement.className = 'test-section success';
+            } else {
+                document.getElementById('reactStatus').innerHTML = '❌ React app failed to load or render';
+                document.getElementById('reactStatus').parentElement.className = 'test-section error';
+            }
+        }
+
+        // Test 4: Network - Check if main.js loads
+        function checkNetwork() {
+            const script = document.createElement('script');
+            script.src = '/src/main.jsx';
+            script.onload = function() {
+                document.getElementById('networkStatus').innerHTML = '✅ Main JavaScript file loaded successfully';
+                document.getElementById('networkStatus').parentElement.className = 'test-section success';
+            };
+            script.onerror = function() {
+                document.getElementById('networkStatus').innerHTML = '❌ Failed to load main JavaScript file';
+                document.getElementById('networkStatus').parentElement.className = 'test-section error';
+            };
+            document.head.appendChild(script);
+        }
+
+        // Run tests
+        setTimeout(checkReactApp, 1000);
+        setTimeout(checkNetwork, 500);
+    </script>
+</body>
+</html>

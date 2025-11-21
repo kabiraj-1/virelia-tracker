@@ -8,9 +8,17 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    // Generate relative paths for better compatibility
     assetsDir: 'assets',
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+        entryFileNames: 'assets/[name].js',
+        chunkFileNames: 'assets/[name].js',
+        assetFileNames: 'assets/[name].[ext]'
+      }
+    }
   },
-  // Use relative paths for better SPA support
   base: './',
+  // Critical for SPA routing
+  appType: 'spa'
 })
