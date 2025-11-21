@@ -156,14 +156,6 @@ const Feed = () => {
             }}>
               í²¬ {post.comments}
             </button>
-            <button style={{
-              background: 'none',
-              border: 'none',
-              color: '#a0aec0',
-              cursor: 'pointer'
-            }}>
-              í´„ Share
-            </button>
           </div>
         </div>
       ))}
