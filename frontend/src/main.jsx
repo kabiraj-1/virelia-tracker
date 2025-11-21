@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
-import './index.css'
+import './index.css'  // Ensure this import is correct
 
 console.log('ÌæØ Starting Virelia Tracker App...');
 
@@ -23,17 +23,7 @@ class ErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return React.createElement('div', {
-        style: {
-          padding: '2rem',
-          textAlign: 'center',
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          color: 'white',
-          minHeight: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center'
-        }
+        className: 'emergency-fallback'
       }, [
         React.createElement('h1', { 
           key: 'title',
@@ -41,7 +31,7 @@ class ErrorBoundary extends React.Component {
         }, 'Ì∫® Application Error'),
         React.createElement('p', {
           key: 'message',
-          style: { marginBottom: '2rem', maxWidth: '500px' }
+          style: { marginBottom: '2rem' }
         }, 'Something went wrong. Please refresh the page.'),
         React.createElement('button', {
           key: 'reload',
@@ -98,18 +88,20 @@ function initializeApp() {
   } catch (error) {
     console.error('‚ùå React rendering failed:', error);
     rootElement.innerHTML = `
-      <div style="padding: 2rem; text-align: center; color: #dc2626;">
-        <h1>‚ùå Rendering Error</h1>
-        <p>${error.message}</p>
-        <button onclick="window.location.reload()" style="
-          padding: 0.75rem 1.5rem;
-          background: #dc2626;
-          color: white;
-          border: none;
-          border-radius: 0.5rem;
-          cursor: pointer;
-          margin-top: 1rem;
-        ">Reload Page</button>
+      <div class="emergency-fallback">
+        <div>
+          <h1>‚ùå Rendering Error</h1>
+          <p>${error.message}</p>
+          <button onclick="window.location.reload()" style="
+            padding: 0.75rem 1.5rem;
+            background: white;
+            color: #6366f1;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            margin-top: 1rem;
+          ">Reload Page</button>
+        </div>
       </div>
     `;
   }
