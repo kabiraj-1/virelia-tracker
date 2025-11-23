@@ -1,37 +1,64 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const postSchema = new mongoose.Schema({
-  content: {
-    type: String,
-    required: true,
-    maxlength: 1000
-  },
-  image: {
-    type: String
-  },
-  author: {
+  user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
-  eventId: {
+  content: {
+    type: String,
+    required: true,
+    maxlength: 2000
+  },
+  media: [{
+    type: String, // URL to uploaded media
+    mimetype: String
+  }],
+  goal: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Event'
+    ref: 'Goal'
+  },
+  scheduledPublish: {
+    type: Date,
+    default: null
+  },
+  isPublished: {
+    type: Boolean,
+    default: false
+  },
+  visibility: {
+    type: String,
+    enum: ['public', 'friends', 'private'],
+    default: 'friends'
   },
   likes: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
   }],
-  commentCount: {
-    type: Number,
-    default: 0
-  },
-  tags: [String]
+  comments: [{
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    content: {
+      type: String,
+      required: true,
+      maxlength: 500
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
+  }]
 }, {
   timestamps: true
 });
 
-postSchema.index({ author: 1, createdAt: -1 });
-postSchema.index({ eventId: 1 });
-
-module.exports = mongoose.model('Post', postSchema);
+export default mongoose.model('Post', postSchema);

@@ -2,38 +2,18 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Navbar from './components/layout/Navbar';
-import LandingPage from './components/landing/LandingPage';
-import LoginForm from './components/auth/LoginForm';
-import RegisterForm from './components/auth/RegisterForm';
-import Dashboard from './components/dashboard/Dashboard';
-import Feed from './components/feed/Feed';
-import Friends from './components/friends/Friends';
-import Activities from './components/activities/Activities';
+import Home from './components/Home';
+import Login from './components/auth/Login';
+import Register from './components/auth/Register';
 import Goals from './components/goals/Goals';
-import Communities from './components/communities/Communities';
-import Analytics from './components/analytics/Analytics';
-import Profile from './components/profile/Profile';
+import Friends from './components/friends/Friends';
+import SocialFeed from './components/social/SocialFeed';
 import './App.css';
 
-const ProtectedRoute = ({ children }) => {
-  const { user, loading } = useAuth();
-  
-  if (loading) {
-    return <div className="loading">Loading...</div>;
-  }
-  
-  return user ? children : <Navigate to="/" />;
-};
-
-const PublicRoute = ({ children }) => {
-  const { user, loading } = useAuth();
-  
-  if (loading) {
-    return <div className="loading">Loading...</div>;
-  }
-  
-  return !user ? children : <Navigate to="/dashboard" />;
-};
+function ProtectedRoute({ children }) {
+  const { user } = useAuth();
+  return user ? children : <Navigate to="/login" />;
+}
 
 function App() {
   return (
@@ -43,57 +23,33 @@ function App() {
           <Navbar />
           <main className="main-content">
             <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/login" element={
-                <PublicRoute>
-                  <LoginForm />
-                </PublicRoute>
-              } />
-              <Route path="/register" element={
-                <PublicRoute>
-                  <RegisterForm />
-                </PublicRoute>
-              } />
-              <Route path="/dashboard" element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              } />
-              <Route path="/feed" element={
-                <ProtectedRoute>
-                  <Feed />
-                </ProtectedRoute>
-              } />
-              <Route path="/friends" element={
-                <ProtectedRoute>
-                  <Friends />
-                </ProtectedRoute>
-              } />
-              <Route path="/activities" element={
-                <ProtectedRoute>
-                  <Activities />
-                </ProtectedRoute>
-              } />
-              <Route path="/goals" element={
-                <ProtectedRoute>
-                  <Goals />
-                </ProtectedRoute>
-              } />
-              <Route path="/communities" element={
-                <ProtectedRoute>
-                  <Communities />
-                </ProtectedRoute>
-              } />
-              <Route path="/analytics" element={
-                <ProtectedRoute>
-                  <Analytics />
-                </ProtectedRoute>
-              } />
-              <Route path="/profile" element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              } />
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route 
+                path="/goals" 
+                element={
+                  <ProtectedRoute>
+                    <Goals />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/friends" 
+                element={
+                  <ProtectedRoute>
+                    <Friends />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/feed" 
+                element={
+                  <ProtectedRoute>
+                    <SocialFeed />
+                  </ProtectedRoute>
+                } 
+              />
             </Routes>
           </main>
         </div>

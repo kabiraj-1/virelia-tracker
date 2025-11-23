@@ -1,0 +1,306 @@
+.social-feed {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.feed-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.feed-header h1 {
+  color: #333;
+  margin: 0 0 10px 0;
+  font-size: 2.5rem;
+}
+
+.feed-header p {
+  color: #666;
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.posts-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.post-card {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  border: 1px solid #e9ecef;
+}
+
+.post-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.post-user-info {
+  flex: 1;
+}
+
+.post-user-info h4 {
+  margin: 0 0 4px 0;
+  color: #333;
+  font-size: 1rem;
+}
+
+.post-date {
+  color: #666;
+  font-size: 0.8rem;
+}
+
+.post-goal {
+  display: inline-block;
+  background: #e7f3ff;
+  color: #1971c2;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  margin-top: 4px;
+}
+
+.post-content {
+  margin-bottom: 15px;
+}
+
+.post-content p {
+  margin: 0 0 15px 0;
+  line-height: 1.5;
+  color: #333;
+}
+
+.post-media {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.post-media img,
+.post-media video {
+  width: 100%;
+  max-height: 400px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.post-stats {
+  display: flex;
+  gap: 15px;
+  padding: 10px 0;
+  border-top: 1px solid #e9ecef;
+  border-bottom: 1px solid #e9ecef;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.post-actions {
+  display: flex;
+  gap: 10px;
+  padding: 15px 0;
+}
+
+.like-btn, .comment-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: #f8f9fa;
+  color: #666;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.like-btn:hover, .comment-btn:hover {
+  background: #e9ecef;
+}
+
+.like-btn.liked {
+  background: #fff0f0;
+  color: #e03131;
+}
+
+.post-comments {
+  border-top: 1px solid #e9ecef;
+  padding-top: 15px;
+}
+
+.comments-list {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 15px;
+}
+
+.comment {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.comment-avatar {
+  width: 32px;
+  height: 32px;
+  background: #dee2e6;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #495057;
+  font-weight: bold;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+.comment-content {
+  flex: 1;
+  background: #f8f9fa;
+  padding: 10px;
+  border-radius: 12px;
+}
+
+.comment-content strong {
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.comment-content p {
+  margin: 4px 0;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.comment-date {
+  color: #666;
+  font-size: 0.7rem;
+}
+
+.comment-form {
+  display: flex;
+  gap: 8px;
+}
+
+.comment-form input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #dee2e6;
+  border-radius: 20px;
+  font-size: 0.9rem;
+}
+
+.comment-form button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 20px;
+  background: #667eea;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.comment-form button:hover {
+  background: #5a6fd8;
+}
+
+.empty-feed {
+  text-align: center;
+  padding: 60px 20px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+}
+
+.empty-feed h3 {
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.empty-feed p {
+  color: #666;
+  margin-bottom: 0;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-top: 30px;
+  padding: 20px;
+}
+
+.pagination button {
+  padding: 8px 16px;
+  border: 1px solid #dee2e6;
+  background: white;
+  color: #333;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination button:hover:not(:disabled) {
+  background: #f8f9fa;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 1.1rem;
+  color: #666;
+}
+
+.error-message {
+  background: #fef2f2;
+  color: #dc2626;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #fecaca;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .social-feed {
+    padding: 10px;
+  }
+  
+  .post-card {
+    padding: 15px;
+  }
+  
+  .post-actions {
+    flex-direction: column;
+  }
+}

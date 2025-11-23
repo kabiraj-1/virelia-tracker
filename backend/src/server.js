@@ -2,11 +2,13 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
 
 // Routes
 import authRoutes from './routes/authRoutes.js';
 import goalRoutes from './routes/goalRoutes.js';
 import friendRoutes from './routes/friendRoutes.js';
+import socialRoutes from './routes/socialRoutes.js';
 
 dotenv.config();
 
@@ -25,6 +27,9 @@ app.options('*', cors());
 
 app.use(express.json());
 
+// Serve uploaded files
+app.use('/uploads', express.static('uploads'));
+
 // Log all requests
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path} - Origin: ${req.headers.origin}`);
@@ -35,6 +40,7 @@ app.use((req, res, next) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/goals', goalRoutes);
 app.use('/api/friends', friendRoutes);
+app.use('/api/social', socialRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -52,6 +58,12 @@ mongoose.connect(process.env.MONGODB_URI)
     console.error('❌ MongoDB connection error:', err);
     process.exit(1);
   });
+
+// Create uploads directory if it doesn't exist
+import fs from 'fs';
+if (!fs.existsSync('uploads')) {
+  fs.mkdirSync('uploads', { recursive: true });
+}
 
 const PORT = process.env.PORT || 5001;
 

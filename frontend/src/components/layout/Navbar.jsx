@@ -1,41 +1,61 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import './Navbar.css';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     logout();
-    navigate('/');
   };
 
   return (
     <nav className="navbar">
       <div className="nav-container">
         <Link to="/" className="nav-logo">
-          Ì∫Ä Virelia Tracker
+          ÌæØ Virelia Tracker
         </Link>
         
         <div className="nav-menu">
           {user ? (
             <>
-              <Link to="/dashboard" className="nav-link">Dashboard</Link>
-              <Link to="/goals" className="nav-link">Goals</Link>
-              <Link to="/activities" className="nav-link">Activities</Link>
-              <Link to="/friends" className="nav-link">Friends</Link>
-              <Link to="/profile" className="nav-link">Profile</Link>
+              <Link 
+                to="/goals" 
+                className={`nav-link ${location.pathname === '/goals' ? 'active' : ''}`}
+              >
+                ÌæØ Goals
+              </Link>
+              <Link 
+                to="/friends" 
+                className={`nav-link ${location.pathname === '/friends' ? 'active' : ''}`}
+              >
+                Ì±• Friends
+              </Link>
+              <Link 
+                to="/feed" 
+                className={`nav-link ${location.pathname === '/feed' ? 'active' : ''}`}
+              >
+                Ì≥± Feed
+              </Link>
               <button onClick={handleLogout} className="nav-link logout-btn">
-                Logout
+                Ì∫™ Logout
               </button>
             </>
           ) : (
             <>
-              <Link to="/login" className="nav-link">Sign In</Link>
-              <Link to="/register" className="nav-link register-btn">
-                Get Started
+              <Link 
+                to="/login" 
+                className={`nav-link ${location.pathname === '/login' ? 'active' : ''}`}
+              >
+                Ì¥ê Login
+              </Link>
+              <Link 
+                to="/register" 
+                className={`nav-link ${location.pathname === '/register' ? 'active' : ''}`}
+              >
+                Ì≥ù Register
               </Link>
             </>
           )}
