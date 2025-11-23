@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { apiService } from '../services/api.js';
+import authService from '../services/authService';
 
 const AuthContext = createContext();
 
@@ -14,7 +14,7 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     checkAuthStatus();
@@ -22,77 +22,77 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuthStatus = async () => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('token');
       if (token) {
-        apiService.setToken(token);
-        const response = await apiService.getCurrentUser();
-        setUser(response.data.user);
+        const userData = await authService.getCurrentUser();
+        setUser(userData);
       }
     } catch (error) {
       console.error('Auth check failed:', error);
-      localStorage.removeItem('authToken');
-      apiService.setToken(null);
+      localStorage.removeItem('token');
     } finally {
       setLoading(false);
     }
   };
 
-  const register = async (userData) => {
+  const login = async (email, password) => {
     try {
-      setError(null);
-      const response = await apiService.register(userData);
+      setError('');
+      setLoading(true);
+      const response = await authService.login(email, password);
       
-      if (response.status === 'success') {
-        apiService.setToken(response.token);
-        setUser(response.data.user);
-        return response;
+      if (response.token && response.user) {
+        localStorage.setItem('token', response.token);
+        setUser(response.user);
+        return { success: true };
+      } else {
+        throw new Error('Invalid response from server');
       }
     } catch (error) {
-      setError(error.message);
-      throw error;
+      const errorMessage = error.response?.data?.error || error.message || 'Login failed';
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setLoading(false);
     }
   };
 
-  const login = async (email, password) => {
+  const register = async (username, email, password) => {
     try {
-      setError(null);
-      const response = await apiService.login({ email, password });
+      setError('');
+      setLoading(true);
+      const response = await authService.register(username, email, password);
       
-      if (response.status === 'success') {
-        apiService.setToken(response.token);
-        setUser(response.data.user);
-        return response;
+      if (response.token && response.user) {
+        localStorage.setItem('token', response.token);
+        setUser(response.user);
+        return { success: true };
+      } else {
+        throw new Error('Invalid response from server');
       }
     } catch (error) {
-      setError(error.message);
-      throw error;
+      const errorMessage = error.response?.data?.error || error.message || 'Registration failed';
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setLoading(false);
     }
   };
 
   const logout = () => {
+    localStorage.removeItem('token');
     setUser(null);
-    setError(null);
-    apiService.setToken(null);
-    localStorage.removeItem('authToken');
-  };
-
-  const updateProfile = (updatedData) => {
-    setUser(prev => ({ ...prev, ...updatedData }));
-  };
-
-  const clearError = () => {
-    setError(null);
+    setError('');
   };
 
   const value = {
     user,
+    loading,
+    error,
     login,
     register,
     logout,
-    updateProfile,
-    loading,
-    error,
-    clearError
+    setError
   };
 
   return (
@@ -101,3 +101,5 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
+
+export default AuthContext;

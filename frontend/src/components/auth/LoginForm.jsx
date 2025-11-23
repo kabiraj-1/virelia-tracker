@@ -1,162 +1,128 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import './Auth.css';
 
-const LoginForm = ({ onToggleMode }) => {
-  const { login, loading, error, clearError } = useAuth();
+const LoginForm = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const { login, user, error, setError } = useAuth();
+  const navigate = useNavigate();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
+
+  // Clear error when component unmounts or form changes
+  useEffect(() => {
+    return () => setError('');
+  }, [setError]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    if (error) clearError();
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+    // Clear error when user starts typing
+    if (error) setError('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+
     try {
-      await login(formData.email, formData.password);
+      console.log('Attempting login with:', { email: formData.email });
+      const result = await login(formData.email, formData.password);
+      
+      if (result.success) {
+        console.log('Login successful, redirecting to dashboard...');
+        navigate('/dashboard');
+      } else {
+        console.error('Login failed:', result.error);
+      }
     } catch (error) {
-      // Error is handled by AuthContext
+      console.error('Login form error:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div style={{
-      background: '#2d3748',
-      padding: '2rem',
-      borderRadius: '0.5rem',
-      maxWidth: '400px',
-      width: '100%'
-    }}>
-      <h2 style={{
-        textAlign: 'center',
-        marginBottom: '2rem',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        WebkitBackgroundClip: 'text',
-        WebkitTextFillColor: 'transparent'
-      }}>
-        Welcome Back
-      </h2>
-
-      {error && (
-        <div style={{
-          background: '#fed7d7',
-          color: '#c53030',
-          padding: '1rem',
-          borderRadius: '0.375rem',
-          marginBottom: '1rem',
-          fontSize: '0.875rem'
-        }}>
-          {error}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={{
-            display: 'block',
-            color: '#a0aec0',
-            marginBottom: '0.5rem',
-            fontSize: '0.875rem',
-            fontWeight: '500'
-          }}>
-            Email Address
-          </label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            style={{
-              width: '100%',
-              padding: '0.75rem',
-              background: '#4a5568',
-              border: '1px solid #4a5568',
-              borderRadius: '0.375rem',
-              color: 'white',
-              fontSize: '1rem'
-            }}
-            placeholder="Enter your email"
-          />
+    <div className="auth-container">
+      <div className="auth-card">
+        <div className="auth-header">
+          <h1>Welcome Back! í±‹</h1>
+          <p>Sign in to continue your productivity journey</p>
         </div>
 
-        <div style={{ marginBottom: '2rem' }}>
-          <label style={{
-            display: 'block',
-            color: '#a0aec0',
-            marginBottom: '0.5rem',
-            fontSize: '0.875rem',
-            fontWeight: '500'
-          }}>
-            Password
-          </label>
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            style={{
-              width: '100%',
-              padding: '0.75rem',
-              background: '#4a5568',
-              border: '1px solid #4a5568',
-              borderRadius: '0.375rem',
-              color: 'white',
-              fontSize: '1rem'
-            }}
-            placeholder="Enter your password"
-          />
-        </div>
+        {error && (
+          <div className="error-message">
+            {error}
+          </div>
+        )}
 
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            width: '100%',
-            padding: '0.75rem',
-            background: loading ? '#4a5568' : '#6366f1',
-            color: 'white',
-            border: 'none',
-            borderRadius: '0.375rem',
-            fontSize: '1rem',
-            fontWeight: '600',
-            cursor: loading ? 'not-allowed' : 'pointer',
-            opacity: loading ? 0.7 : 1
-          }}
-        >
-          {loading ? 'Signing In...' : 'Sign In'}
-        </button>
-      </form>
+        <form onSubmit={handleSubmit} className="auth-form">
+          <div className="form-group">
+            <label htmlFor="email">Email Address</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Enter your email"
+              required
+              disabled={isSubmitting}
+            />
+          </div>
 
-      <div style={{
-        textAlign: 'center',
-        marginTop: '1.5rem',
-        paddingTop: '1.5rem',
-        borderTop: '1px solid #4a5568'
-      }}>
-        <p style={{ color: '#a0aec0', margin: 0 }}>
-          Don't have an account?{' '}
-          <button
-            onClick={onToggleMode}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#6366f1',
-              cursor: 'pointer',
-              textDecoration: 'underline'
-            }}
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Enter your password"
+              required
+              disabled={isSubmitting}
+            />
+          </div>
+
+          <button 
+            type="submit" 
+            className="auth-button"
+            disabled={isSubmitting}
           >
-            Sign up
+            {isSubmitting ? 'Signing In...' : 'Sign In'}
           </button>
-        </p>
+        </form>
+
+        <div className="auth-footer">
+          <p>
+            Don't have an account?{' '}
+            <Link to="/register" className="auth-link">
+              Sign up here
+            </Link>
+          </p>
+        </div>
+
+        {/* Debug info - remove in production */}
+        <div style={{ marginTop: '20px', padding: '10px', background: '#f5f5f5', borderRadius: '5px', fontSize: '12px' }}>
+          <strong>Debug Info:</strong><br />
+          API URL: {import.meta.env.VITE_API_URL}<br />
+          Email: {formData.email}<br />
+          Submitting: {isSubmitting.toString()}
+        </div>
       </div>
     </div>
   );

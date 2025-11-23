@@ -1,240 +1,186 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import './Auth.css';
 
-const RegisterForm = ({ onToggleMode }) => {
-  const { register, loading, error, clearError } = useAuth();
+const RegisterForm = () => {
   const [formData, setFormData] = useState({
-    name: '',
+    username: '',
     email: '',
     password: '',
     confirmPassword: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [validationError, setValidationError] = useState('');
+  
+  const { register, user, error, setError } = useAuth();
+  const navigate = useNavigate();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
+
+  // Clear error when component unmounts
+  useEffect(() => {
+    return () => setError('');
+  }, [setError]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    if (error) clearError();
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+    // Clear errors when user starts typing
+    if (error) setError('');
+    if (validationError) setValidationError('');
+  };
+
+  const validateForm = () => {
+    if (formData.password.length < 6) {
+      setValidationError('Password must be at least 6 characters long');
+      return false;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      setValidationError('Passwords do not match');
+      return false;
+    }
+    if (formData.username.length < 3) {
+      setValidationError('Username must be at least 3 characters long');
+      return false;
+    }
+    return true;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (formData.password !== formData.confirmPassword) {
-      clearError();
-      alert('Passwords do not match');
+    if (!validateForm()) {
       return;
     }
 
-    if (formData.password.length < 6) {
-      clearError();
-      alert('Password must be at least 6 characters');
-      return;
-    }
+    setIsSubmitting(true);
 
     try {
-      await register({
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-        confirmPassword: formData.confirmPassword
+      console.log('Attempting registration with:', { 
+        username: formData.username, 
+        email: formData.email 
       });
+      
+      const result = await register(formData.username, formData.email, formData.password);
+      
+      if (result.success) {
+        console.log('Registration successful, redirecting to dashboard...');
+        navigate('/dashboard');
+      } else {
+        console.error('Registration failed:', result.error);
+      }
     } catch (error) {
-      // Error is handled by AuthContext
+      console.error('Registration form error:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div style={{
-      background: '#2d3748',
-      padding: '2rem',
-      borderRadius: '0.5rem',
-      maxWidth: '400px',
-      width: '100%'
-    }}>
-      <h2 style={{
-        textAlign: 'center',
-        marginBottom: '2rem',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        WebkitBackgroundClip: 'text',
-        WebkitTextFillColor: 'transparent'
-      }}>
-        Create Account
-      </h2>
-
-      {error && (
-        <div style={{
-          background: '#fed7d7',
-          color: '#c53030',
-          padding: '1rem',
-          borderRadius: '0.375rem',
-          marginBottom: '1rem',
-          fontSize: '0.875rem'
-        }}>
-          {error}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={{
-            display: 'block',
-            color: '#a0aec0',
-            marginBottom: '0.5rem',
-            fontSize: '0.875rem',
-            fontWeight: '500'
-          }}>
-            Full Name
-          </label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            style={{
-              width: '100%',
-              padding: '0.75rem',
-              background: '#4a5568',
-              border: '1px solid #4a5568',
-              borderRadius: '0.375rem',
-              color: 'white',
-              fontSize: '1rem'
-            }}
-            placeholder="Enter your full name"
-          />
+    <div className="auth-container">
+      <div className="auth-card">
+        <div className="auth-header">
+          <h1>Join Virelia Tracker! íº€</h1>
+          <p>Create your account and start achieving your goals</p>
         </div>
 
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={{
-            display: 'block',
-            color: '#a0aec0',
-            marginBottom: '0.5rem',
-            fontSize: '0.875rem',
-            fontWeight: '500'
-          }}>
-            Email Address
-          </label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            style={{
-              width: '100%',
-              padding: '0.75rem',
-              background: '#4a5568',
-              border: '1px solid #4a5568',
-              borderRadius: '0.375rem',
-              color: 'white',
-              fontSize: '1rem'
-            }}
-            placeholder="Enter your email"
-          />
-        </div>
+        {(error || validationError) && (
+          <div className="error-message">
+            {error || validationError}
+          </div>
+        )}
 
-        <div style={{ marginBottom: '1rem' }}>
-          <label style={{
-            display: 'block',
-            color: '#a0aec0',
-            marginBottom: '0.5rem',
-            fontSize: '0.875rem',
-            fontWeight: '500'
-          }}>
-            Password
-          </label>
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            style={{
-              width: '100%',
-              padding: '0.75rem',
-              background: '#4a5568',
-              border: '1px solid #4a5568',
-              borderRadius: '0.375rem',
-              color: 'white',
-              fontSize: '1rem'
-            }}
-            placeholder="Enter your password"
-          />
-        </div>
+        <form onSubmit={handleSubmit} className="auth-form">
+          <div className="form-group">
+            <label htmlFor="username">Username</label>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              placeholder="Choose a username"
+              required
+              disabled={isSubmitting}
+            />
+          </div>
 
-        <div style={{ marginBottom: '2rem' }}>
-          <label style={{
-            display: 'block',
-            color: '#a0aec0',
-            marginBottom: '0.5rem',
-            fontSize: '0.875rem',
-            fontWeight: '500'
-          }}>
-            Confirm Password
-          </label>
-          <input
-            type="password"
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            required
-            style={{
-              width: '100%',
-              padding: '0.75rem',
-              background: '#4a5568',
-              border: '1px solid #4a5568',
-              borderRadius: '0.375rem',
-              color: 'white',
-              fontSize: '1rem'
-            }}
-            placeholder="Confirm your password"
-          />
-        </div>
+          <div className="form-group">
+            <label htmlFor="email">Email Address</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Enter your email"
+              required
+              disabled={isSubmitting}
+            />
+          </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            width: '100%',
-            padding: '0.75rem',
-            background: loading ? '#4a5568' : '#6366f1',
-            color: 'white',
-            border: 'none',
-            borderRadius: '0.375rem',
-            fontSize: '1rem',
-            fontWeight: '600',
-            cursor: loading ? 'not-allowed' : 'pointer',
-            opacity: loading ? 0.7 : 1
-          }}
-        >
-          {loading ? 'Creating Account...' : 'Create Account'}
-        </button>
-      </form>
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Create a password (min. 6 characters)"
+              required
+              disabled={isSubmitting}
+            />
+          </div>
 
-      <div style={{
-        textAlign: 'center',
-        marginTop: '1.5rem',
-        paddingTop: '1.5rem',
-        borderTop: '1px solid #4a5568'
-      }}>
-        <p style={{ color: '#a0aec0', margin: 0 }}>
-          Already have an account?{' '}
-          <button
-            onClick={onToggleMode}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#6366f1',
-              cursor: 'pointer',
-              textDecoration: 'underline'
-            }}
+          <div className="form-group">
+            <label htmlFor="confirmPassword">Confirm Password</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              placeholder="Confirm your password"
+              required
+              disabled={isSubmitting}
+            />
+          </div>
+
+          <button 
+            type="submit" 
+            className="auth-button"
+            disabled={isSubmitting}
           >
-            Sign in
+            {isSubmitting ? 'Creating Account...' : 'Create Account'}
           </button>
-        </p>
+        </form>
+
+        <div className="auth-footer">
+          <p>
+            Already have an account?{' '}
+            <Link to="/login" className="auth-link">
+              Sign in here
+            </Link>
+          </p>
+        </div>
+
+        {/* Debug info - remove in production */}
+        <div style={{ marginTop: '20px', padding: '10px', background: '#f5f5f5', borderRadius: '5px', fontSize: '12px' }}>
+          <strong>Debug Info:</strong><br />
+          API URL: {import.meta.env.VITE_API_URL}<br />
+          Username: {formData.username}<br />
+          Email: {formData.email}<br />
+          Submitting: {isSubmitting.toString()}
+        </div>
       </div>
     </div>
   );
