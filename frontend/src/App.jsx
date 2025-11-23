@@ -12,6 +12,7 @@ import Activities from './components/activities/Activities';
 import Goals from './components/goals/Goals';
 import Communities from './components/communities/Communities';
 import Analytics from './components/analytics/Analytics';
+import Profile from './components/profile/Profile';
 import './App.css';
 
 const ProtectedRoute = ({ children }) => {
@@ -86,6 +87,11 @@ function App() {
               <Route path="/analytics" element={
                 <ProtectedRoute>
                   <Analytics />
+                </ProtectedRoute>
+              } />
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <Profile />
                 </ProtectedRoute>
               } />
             </Routes>
