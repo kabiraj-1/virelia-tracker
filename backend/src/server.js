@@ -1,75 +1,132 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
-// ES modules fix for __dirname
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Routes
+import authRoutes from './routes/auth.js';
 
 // Load environment variables
 dotenv.config();
 
 const app = express();
+const PORT = process.env.PORT || 10000;
 
-// Middleware
-app.use(cors());
+// Basic middleware
 app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(express.static(path.join(__dirname, '../../frontend/dist')));
+app.use(express.urlencoded({ extended: true }));
 
-// MongoDB connection
-const MONGODB_URI = process.env.MONGODB_URI;
+// CORS - allow frontend domains
+app.use(cors({
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'https://virelia-tracker-frontend.vercel.app',
+    'https://kabirajbhatt.com.np'
+  ],
+  credentials: true
+}));
 
-if (!MONGODB_URI) {
-  console.error('âŒ MONGODB_URI is not defined in environment variables');
-  process.exit(1);
-}
+// Security middleware
+app.use(helmet());
 
-mongoose.connect(MONGODB_URI)
-  .then(() => console.log('âœ… MongoDB Connected Successfully'))
-  .catch(err => {
-    console.error('âŒ MongoDB Connection Error:', err.message);
-    process.exit(1);
-  });
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100
+});
+app.use(limiter);
 
-// Import routes
-import authRoutes from './routes/auth.js';
-
-// Use routes
-app.use('/api/auth', authRoutes);
-
-// Health check route
+// Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
-    message: 'Virelia Tracker Backend is running!',
+  res.status(200).json({
+    status: 'OK',
+    message: 'Virelia Tracker Backend is running',
     timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
     database: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected'
   });
 });
 
-// Serve frontend for all other routes (SPA support)
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../frontend/dist/index.html'));
-});
+// API routes
+app.use('/api/auth', authRoutes);
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error('Error:', err.stack);
-  res.status(500).json({
-    status: 'error',
-    message: 'Something went wrong!'
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({
+    message: 'íº€ Virelia Tracker Backend API',
+    version: '2.0.0',
+    endpoints: {
+      health: '/api/health',
+      auth: '/api/auth',
+      docs: 'Coming soon...'
+    }
   });
 });
 
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(`íº€ Virelia Tracker Backend running on port ${PORT}`);
-  console.log(`í³Š MongoDB: ${mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected'}`);
-  console.log(`í¼ Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`í´ JWT Secret: ${process.env.JWT_SECRET ? 'Set' : 'Not set'}`);
+// 404 handler for API routes
+app.use('/api/*', (req, res) => {
+  res.status(404).json({
+    status: 'error',
+    message: 'API endpoint not found'
+  });
 });
+
+// All other routes - return simple message
+app.use('*', (req, res) => {
+  res.json({
+    message: 'Virelia Tracker Backend API',
+    note: 'Frontend is served separately from Vercel',
+    frontend: 'https://virelia-tracker-frontend.vercel.app'
+  });
+});
+
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  res.status(500).json({
+    status: 'error',
+    message: 'Internal server error'
+  });
+});
+
+// MongoDB connection
+const connectDB = async () => {
+  try {
+    console.log('í´— Connecting to MongoDB...');
+    const conn = await mongoose.connect(process.env.MONGODB_URI);
+    console.log('âœ… MongoDB Connected Successfully');
+    return true;
+  } catch (error) {
+    console.error('âŒ MongoDB Connection Error:', error.message);
+    return false;
+  }
+};
+
+// Start server
+const startServer = async () => {
+  console.log('íº€ Starting Virelia Tracker Backend...');
+  
+  await connectDB();
+  
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`í¾¯ Backend API running on port ${PORT}`);
+    console.log(`ï¿½ï¿½ Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`í´ JWT Secret: ${process.env.JWT_SECRET ? 'Set' : 'Not set'}`);
+    console.log(`í³Š MongoDB: ${mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected'}`);
+    console.log(`í¾¨ Frontend: https://virelia-tracker-frontend.vercel.app`);
+  });
+};
+
+// Error handlers
+process.on('uncaughtException', (err) => {
+  console.log('UNCAUGHT EXCEPTION! í²¥', err);
+});
+
+process.on('unhandledRejection', (err) => {
+  console.log('UNHANDLED REJECTION! í²¥', err);
+});
+
+startServer();
