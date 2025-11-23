@@ -1,10 +1,16 @@
-.friends {
-  max-width: 1000px;
+.friends-page {
+  max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
+  text-align: center;
 }
 
-.empty-friends {
-  text-align: center;
-  padding: 60px 20px;
+.friends-page h1 {
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.friends-page p {
+  color: #666;
+  font-size: 1.1rem;
 }

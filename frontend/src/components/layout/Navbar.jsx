@@ -1,56 +1,44 @@
-import React, { useContext } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { AuthContext } from '../../contexts/AuthContext';
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import './Navbar.css';
 
 const Navbar = () => {
-  const { user, logout } = useContext(AuthContext);
-  const location = useLocation();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
     <nav className="navbar">
-      <div className="nav-brand">
-        <Link to="/">íº€ Virelia Tracker</Link>
-      </div>
-      
-      <div className="nav-links">
-        <Link to="/dashboard" className={location.pathname === '/dashboard' ? 'active' : ''}>
-          Dashboard
+      <div className="nav-container">
+        <Link to="/" className="nav-logo">
+          íº€ Virelia Tracker
         </Link>
-        <Link to="/feed" className={location.pathname === '/feed' ? 'active' : ''}>
-          Feed
-        </Link>
-        <Link to="/friends" className={location.pathname === '/friends' ? 'active' : ''}>
-          Friends
-        </Link>
-        <Link to="/activities" className={location.pathname === '/activities' ? 'active' : ''}>
-          Activity
-        </Link>
-        <Link to="/goals" className={location.pathname === '/goals' ? 'active' : ''}>
-          Goals
-        </Link>
-        <Link to="/communities" className={location.pathname === '/communities' ? 'active' : ''}>
-          Communities
-        </Link>
-        <Link to="/analytics" className={location.pathname === '/analytics' ? 'active' : ''}>
-          Analytics
-        </Link>
-      </div>
-
-      <div className="nav-user">
-        {user ? (
-          <div className="user-menu">
-            <span>Hi, {user.name || 'User'}!</span>
-            <button onClick={logout} className="logout-btn">
-              Logout
-            </button>
-          </div>
-        ) : (
-          <div className="auth-links">
-            <Link to="/login" className="login-btn">Login</Link>
-            <Link to="/register" className="register-btn">Sign Up</Link>
-          </div>
-        )}
+        
+        <div className="nav-menu">
+          {user ? (
+            <>
+              <Link to="/dashboard" className="nav-link">Dashboard</Link>
+              <Link to="/goals" className="nav-link">Goals</Link>
+              <Link to="/activities" className="nav-link">Activities</Link>
+              <Link to="/friends" className="nav-link">Friends</Link>
+              <button onClick={handleLogout} className="nav-link logout-btn">
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="nav-link">Sign In</Link>
+              <Link to="/register" className="nav-link register-btn">
+                Get Started
+              </Link>
+            </>
+          )}
+        </div>
       </div>
     </nav>
   );
