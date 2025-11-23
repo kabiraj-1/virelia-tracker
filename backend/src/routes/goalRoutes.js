@@ -1,6 +1,6 @@
 import express from 'express';
 import Goal from '../models/Goal.js';
-import auth from '../middleware/auth.js';
+import { auth } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -38,9 +38,11 @@ router.put('/:id', auth, async (req, res) => {
       return res.status(404).json({ error: 'Goal not found' });
     }
 
-    Object.keys(req.body).forEach(key => {
-      if (req.body[key] !== undefined) {
-        goal[key] = req.body[key];
+    // Update only allowed fields
+    const allowedUpdates = ['title', 'description', 'category', 'targetDate', 'progress', 'isCompleted'];
+    allowedUpdates.forEach(field => {
+      if (req.body[field] !== undefined) {
+        goal[field] = req.body[field];
       }
     });
 

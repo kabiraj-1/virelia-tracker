@@ -1,47 +1,98 @@
-const express = require('express');
+import express from 'express';
+import jwt from 'jsonwebtoken';
+import User from '../models/User.js';
+import { auth } from '../middleware/auth.js';
+
 const router = express.Router();
 
-// Register route
-router.post('/register', (req, res) => {
-  res.status(201).json({
-    success: true,
-    message: 'User registration successful',
-    user: {
-      id: 'demo-user-123',
-      name: req.body.name,
-      email: req.body.email,
-      karma: 100
-    },
-    token: 'demo-jwt-token'
-  });
+// Register
+router.post('/register', async (req, res) => {
+  try {
+    const { username, email, password } = req.body;
+
+    // Check if user exists
+    const existingUser = await User.findOne({ 
+      $or: [{ email }, { username }] 
+    });
+    
+    if (existingUser) {
+      return res.status(400).json({ 
+        error: 'User with this email or username already exists' 
+      });
+    }
+
+    // Create new user
+    const user = new User({ username, email, password });
+    await user.save();
+
+    // Generate token
+    const token = jwt.sign(
+      { id: user._id }, 
+      process.env.JWT_SECRET, 
+      { expiresIn: '7d' }
+    );
+
+    res.status(201).json({
+      token,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email
+      }
+    });
+  } catch (error) {
+    console.error('Registration error:', error);
+    res.status(400).json({ error: error.message });
+  }
 });
 
-// Login route
-router.post('/login', (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: 'Login successful',
-    user: {
-      id: 'demo-user-123',
-      name: 'Demo User',
-      email: req.body.email,
-      karma: 1250
-    },
-    token: 'demo-jwt-token'
-  });
+// Login
+router.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Find user
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ error: 'Invalid credentials' });
+    }
+
+    // Check password
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(400).json({ error: 'Invalid credentials' });
+    }
+
+    // Generate token
+    const token = jwt.sign(
+      { id: user._id }, 
+      process.env.JWT_SECRET, 
+      { expiresIn: '7d' }
+    );
+
+    res.json({
+      token,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email
+      }
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-// Profile route
-router.get('/profile', (req, res) => {
+// Get current user
+router.get('/me', auth, async (req, res) => {
   res.json({
-    success: true,
     user: {
-      id: 'demo-user-123',
-      name: 'Demo User',
-      email: 'demo@virelia.com',
-      karma: 1250
+      id: req.user._id,
+      username: req.user.username,
+      email: req.user.email
     }
   });
 });
 
-module.exports = router;
+export default router;
