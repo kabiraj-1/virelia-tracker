@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 // Routes
 import authRoutes from './routes/authRoutes.js';
@@ -13,6 +14,10 @@ import socialRoutes from './routes/socialRoutes.js';
 dotenv.config();
 
 const app = express();
+
+// Get __dirname equivalent for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // CORS configuration
 app.use(cors({
@@ -28,7 +33,7 @@ app.options('*', cors());
 app.use(express.json());
 
 // Serve uploaded files
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Log all requests
 app.use((req, res, next) => {
@@ -61,13 +66,15 @@ mongoose.connect(process.env.MONGODB_URI)
 
 // Create uploads directory if it doesn't exist
 import fs from 'fs';
-if (!fs.existsSync('uploads')) {
-  fs.mkdirSync('uploads', { recursive: true });
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+  console.log('âœ… Uploads directory created');
 }
 
 const PORT = process.env.PORT || 5001;
 
 app.listen(PORT, () => {
-  console.log(`íº€ Server running on port ${PORT}`);
+  console.log(`ï¿½ï¿½ Server running on port ${PORT}`);
   console.log(`í´— Health check: http://localhost:${PORT}/api/health`);
 });

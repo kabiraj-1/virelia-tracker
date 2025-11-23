@@ -12,7 +12,7 @@ const postSchema = new mongoose.Schema({
     maxlength: 2000
   },
   media: [{
-    type: String, // URL to uploaded media
+    url: String,
     mimetype: String
   }],
   goal: {
