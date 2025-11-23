@@ -22,6 +22,12 @@ const Navbar = () => {
           {user ? (
             <>
               <Link 
+                to="/" 
+                className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
+              >
+                í³Š Dashboard
+              </Link>
+              <Link 
                 to="/goals" 
                 className={`nav-link ${location.pathname === '/goals' ? 'active' : ''}`}
               >
@@ -37,7 +43,7 @@ const Navbar = () => {
                 to="/feed" 
                 className={`nav-link ${location.pathname === '/feed' ? 'active' : ''}`}
               >
-                í³± Feed
+                í³± Posts
               </Link>
               <button onClick={handleLogout} className="nav-link logout-btn">
                 íºª Logout

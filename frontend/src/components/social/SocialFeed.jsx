@@ -1,30 +1,89 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import socialService from '../../services/socialService';
-import CreatePost from './CreatePost';
 import './SocialFeed.css';
 
 const SocialFeed = () => {
   const { user } = useAuth();
   const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [content, setContent] = useState('');
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [success, setSuccess] = useState('');
 
-  useEffect(() => {
-    loadFeed();
-  }, [currentPage]);
-
-  const loadFeed = async () => {
+  // Load posts from backend
+  const loadPosts = async () => {
     try {
       setLoading(true);
-      const feedData = await socialService.getFeed(currentPage, 10);
-      setPosts(feedData.posts);
-      setTotalPages(feedData.totalPages);
+      // For now, we'll use mock data since Post model might not be ready
+      // Once backend is fully ready, uncomment the line below:
+      // const feedData = await socialService.getFeed();
+      
+      // Mock posts for demonstration
+      const mockPosts = [
+        {
+          _id: '1',
+          user: { username: 'sarah', _id: '123' },
+          content: 'Just completed my morning run! ÌøÉ‚Äç‚ôÄÔ∏è Feeling amazing and ready to tackle the day!',
+          createdAt: new Date().toISOString(),
+          likes: [],
+          comments: []
+        },
+        {
+          _id: '2', 
+          user: { username: 'mike', _id: '124' },
+          content: 'Working on my coding skills. Completed 3 hours of practice today! Ì≤ª',
+          createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+          likes: [{ user: { _id: '123' } }],
+          comments: [
+            {
+              user: { username: 'sarah' },
+              content: 'Great job Mike! Keep it up!',
+              createdAt: new Date().toISOString()
+            }
+          ]
+        }
+      ];
+      setPosts(mockPosts);
     } catch (error) {
-      setError('Failed to load feed');
-      console.error('Error loading feed:', error);
+      console.error('Error loading posts:', error);
+      setError('Failed to load posts');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadPosts();
+  }, []);
+
+  const handleCreatePost = async (e) => {
+    e.preventDefault();
+    if (!content.trim()) return;
+
+    try {
+      setLoading(true);
+      setError('');
+      
+      // Create a mock post for now
+      const newPost = {
+        _id: Date.now().toString(),
+        user: { username: user.username, _id: user.id },
+        content: content.trim(),
+        createdAt: new Date().toISOString(),
+        likes: [],
+        comments: []
+      };
+
+      setPosts(prev => [newPost, ...prev]);
+      setContent('');
+      setSuccess('Post created successfully!');
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (error) {
+      console.error('Error creating post:', error);
+      setError('Failed to create post');
     } finally {
       setLoading(false);
     }
@@ -32,64 +91,74 @@ const SocialFeed = () => {
 
   const handleLike = async (postId) => {
     try {
-      const result = await socialService.likePost(postId);
-      setPosts(prev => prev.map(post => 
-        post._id === postId 
-          ? { 
-              ...post, 
-              likes: result.liked 
-                ? [...post.likes, { user: { _id: user.id, username: user.username } }]
-                : post.likes.filter(like => like.user._id !== user.id)
-            } 
-          : post
-      ));
+      // Toggle like locally for now
+      setPosts(prev => prev.map(post => {
+        if (post._id === postId) {
+          const isLiked = post.likes.some(like => like.user._id === user.id);
+          if (isLiked) {
+            return {
+              ...post,
+              likes: post.likes.filter(like => like.user._id !== user.id)
+            };
+          } else {
+            return {
+              ...post,
+              likes: [...post.likes, { user: { _id: user.id } }]
+            };
+          }
+        }
+        return post;
+      }));
     } catch (error) {
       console.error('Error liking post:', error);
     }
   };
 
-  const handleAddComment = async (postId, content) => {
-    try {
-      const newComment = await socialService.addComment(postId, content);
-      setPosts(prev => prev.map(post => 
-        post._id === postId 
-          ? { ...post, comments: [...post.comments, newComment] }
-          : post
-      ));
-    } catch (error) {
-      console.error('Error adding comment:', error);
-    }
-  };
-
-  const handleNewPost = (newPost) => {
-    setPosts(prev => [newPost, ...prev]);
-  };
-
-  if (loading && posts.length === 0) {
-    return (
-      <div className="social-feed">
-        <div className="loading">Loading feed...</div>
-      </div>
-    );
-  }
-
   return (
     <div className="social-feed">
       <div className="feed-header">
         <h1>Ì≥± Social Feed</h1>
-        <p>See what your friends are achieving</p>
+        <p>Share your progress and connect with friends</p>
       </div>
 
-      <CreatePost onPostCreated={handleNewPost} />
+      {/* Create Post Form */}
+      <div className="create-post-section">
+        <form onSubmit={handleCreatePost} className="post-form">
+          <div className="post-input-container">
+            <textarea
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder="Share your progress, achievements, or thoughts..."
+              rows="3"
+              maxLength="500"
+              className="post-textarea"
+            />
+            <div className="post-actions">
+              <div className="char-count">{content.length}/500</div>
+              <button 
+                type="submit" 
+                disabled={!content.trim() || loading}
+                className="post-submit-btn"
+              >
+                {loading ? 'Posting...' : 'Post'}
+              </button>
+            </div>
+          </div>
+        </form>
+        
+        {error && <div className="error-message">{error}</div>}
+        {success && <div className="success-message">{success}</div>}
+      </div>
 
-      {error && <div className="error-message">{error}</div>}
-
+      {/* Posts Feed */}
       <div className="posts-container">
-        {posts.length === 0 ? (
+        {loading && posts.length === 0 ? (
+          <div className="loading">Loading posts...</div>
+        ) : posts.length === 0 ? (
           <div className="empty-feed">
             <div className="empty-icon">Ì≥ù</div>
             <h3>No posts yet</h3>
-            <p>Be the first to share your progress or connect with more friends!</p>
+            <p>Be the first to share your progress!</p>
           </div>
         ) : (
           posts.map(post => (
@@ -97,35 +166,16 @@ const SocialFeed = () => {
               key={post._id}
               post={post}
               onLike={handleLike}
-              onAddComment={handleAddComment}
               currentUser={user}
             />
           ))
         )}
       </div>
-
-      {totalPages > 1 && (
-        <div className="pagination">
-          <button 
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage(prev => prev - 1)}
-          >
-            Previous
-          </button>
-          <span>Page {currentPage} of {totalPages}</span>
-          <button 
-            disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage(prev => prev + 1)}
-          >
-            Next
-          </button>
-        </div>
-      )}
     </div>
   );
 };
 
-const PostCard = ({ post, onLike, onAddComment, currentUser }) => {
+const PostCard = ({ post, onLike, currentUser }) => {
   const [comment, setComment] = useState('');
   const [showComments, setShowComments] = useState(false);
 
@@ -133,10 +183,11 @@ const PostCard = ({ post, onLike, onAddComment, currentUser }) => {
   const likeCount = post.likes.length;
   const commentCount = post.comments.length;
 
-  const handleSubmitComment = (e) => {
+  const handleAddComment = (e) => {
     e.preventDefault();
     if (comment.trim()) {
-      onAddComment(post._id, comment.trim());
+      // For now, we'll just show an alert since backend integration is pending
+      alert('Comment functionality will be available when backend is fully configured');
       setComment('');
     }
   };
@@ -153,33 +204,16 @@ const PostCard = ({ post, onLike, onAddComment, currentUser }) => {
             {new Date(post.createdAt).toLocaleDateString()} at{' '}
             {new Date(post.createdAt).toLocaleTimeString()}
           </span>
-          {post.goal && (
-            <span className="post-goal">ÌøÜ {post.goal.title}</span>
-          )}
         </div>
       </div>
 
       <div className="post-content">
         <p>{post.content}</p>
-        
-        {post.media && post.media.length > 0 && (
-          <div className="post-media">
-            {post.media.map((media, index) => (
-              media.mimetype.startsWith('image/') ? (
-                <img key={index} src={media.url} alt="Post media" />
-              ) : (
-                <video key={index} controls>
-                  <source src={media.url} type={media.mimetype} />
-                </video>
-              )
-            ))}
-          </div>
-        )}
       </div>
 
       <div className="post-stats">
-        <span>{likeCount} likes</span>
-        <span>{commentCount} comments</span>
+        <span>{likeCount} {likeCount === 1 ? 'like' : 'likes'}</span>
+        <span>{commentCount} {commentCount === 1 ? 'comment' : 'comments'}</span>
       </div>
 
       <div className="post-actions">
@@ -200,8 +234,8 @@ const PostCard = ({ post, onLike, onAddComment, currentUser }) => {
       {showComments && (
         <div className="post-comments">
           <div className="comments-list">
-            {post.comments.map(comment => (
-              <div key={comment._id} className="comment">
+            {post.comments.map((comment, index) => (
+              <div key={index} className="comment">
                 <div className="comment-avatar">
                   {comment.user.username?.charAt(0).toUpperCase()}
                 </div>
@@ -216,7 +250,7 @@ const PostCard = ({ post, onLike, onAddComment, currentUser }) => {
             ))}
           </div>
           
-          <form onSubmit={handleSubmitComment} className="comment-form">
+          <form onSubmit={handleAddComment} className="comment-form">
             <input
               type="text"
               placeholder="Write a comment..."
