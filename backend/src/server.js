@@ -6,28 +6,35 @@ import dotenv from 'dotenv';
 // Routes
 import authRoutes from './routes/authRoutes.js';
 import goalRoutes from './routes/goalRoutes.js';
+import friendRoutes from './routes/friendRoutes.js';
 
 dotenv.config();
 
-// Validate required environment variables
-const requiredEnvVars = ['MONGODB_URI', 'JWT_SECRET'];
-const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
-
-if (missingEnvVars.length > 0) {
-  console.error('‚ùå Missing required environment variables:', missingEnvVars.join(', '));
-  console.error('Please check your .env file or Render environment variables');
-  process.exit(1);
-}
-
 const app = express();
 
-// Middleware
-app.use(cors());
+// CORS configuration
+app.use(cors({
+  origin: true, // Allow all origins in development
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept']
+}));
+
+// Handle preflight requests
+app.options('*', cors());
+
 app.use(express.json());
+
+// Log all requests
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path} - Origin: ${req.headers.origin}`);
+  next();
+});
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/goals', goalRoutes);
+app.use('/api/friends', friendRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -46,21 +53,9 @@ mongoose.connect(process.env.MONGODB_URI)
     process.exit(1);
   });
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error('Unhandled error:', err);
-  res.status(500).json({ error: 'Something went wrong!' });
-});
-
-// 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({ error: 'Route not found' });
-});
-
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 app.listen(PORT, () => {
   console.log(`Ì∫Ä Server running on port ${PORT}`);
   console.log(`Ì¥ó Health check: http://localhost:${PORT}/api/health`);
-  console.log(`Ìºê Environment: ${process.env.NODE_ENV || 'development'}`);
 });

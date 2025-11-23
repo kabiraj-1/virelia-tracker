@@ -1,100 +1,130 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import friendService from '../../services/friendService';
 import './Friends.css';
 
 const Friends = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('friends');
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [friends, setFriends] = useState([]);
+  const [friendRequests, setFriendRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchLoading, setSearchLoading] = useState(false);
 
-  // Mock data - in a real app, this would come from an API
-  const [friends, setFriends] = useState([
-    {
-      id: 1,
-      username: 'alex_johnson',
-      name: 'Alex Johnson',
-      avatar: 'AJ',
-      goalsCompleted: 12,
-      currentStreak: 5,
-      mutualFriends: 3
-    },
-    {
-      id: 2,
-      username: 'sarah_m',
-      name: 'Sarah Miller',
-      avatar: 'SM',
-      goalsCompleted: 8,
-      currentStreak: 12,
-      mutualFriends: 2
-    },
-    {
-      id: 3,
-      username: 'mike_chen',
-      name: 'Mike Chen',
-      avatar: 'MC',
-      goalsCompleted: 15,
-      currentStreak: 7,
-      mutualFriends: 5
-    }
-  ]);
+  useEffect(() => {
+    loadFriendsData();
+  }, []);
 
-  const [friendRequests, setFriendRequests] = useState([
-    {
-      id: 4,
-      username: 'jessica_w',
-      name: 'Jessica Wilson',
-      avatar: 'JW',
-      mutualFriends: 1
-    }
-  ]);
-
-  const [suggestedFriends, setSuggestedFriends] = useState([
-    {
-      id: 5,
-      username: 'david_k',
-      name: 'David Kim',
-      avatar: 'DK',
-      mutualFriends: 4,
-      commonGoals: 3
-    },
-    {
-      id: 6,
-      username: 'lisa_p',
-      name: 'Lisa Parker',
-      avatar: 'LP',
-      mutualFriends: 2,
-      commonGoals: 2
-    }
-  ]);
-
-  const handleAddFriend = (friendId) => {
-    const friend = suggestedFriends.find(f => f.id === friendId);
-    if (friend) {
-      setFriends([...friends, { ...friend, goalsCompleted: 0, currentStreak: 0 }]);
-      setSuggestedFriends(suggestedFriends.filter(f => f.id !== friendId));
+  const loadFriendsData = async () => {
+    try {
+      setLoading(true);
+      const [friendsData, requestsData] = await Promise.all([
+        friendService.getFriends(),
+        friendService.getFriendRequests()
+      ]);
+      setFriends(friendsData);
+      setFriendRequests(requestsData);
+    } catch (error) {
+      setError('Failed to load friends data');
+      console.error('Error loading friends data:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleAcceptRequest = (requestId) => {
-    const request = friendRequests.find(f => f.id === requestId);
-    if (request) {
-      setFriends([...friends, { ...request, goalsCompleted: 0, currentStreak: 0 }]);
-      setFriendRequests(friendRequests.filter(f => f.id !== requestId));
+  const handleSearch = async (query) => {
+    if (query.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+
+    try {
+      setSearchLoading(true);
+      const results = await friendService.searchUsers(query);
+      setSearchResults(results);
+    } catch (error) {
+      console.error('Error searching users:', error);
+      setSearchResults([]);
+    } finally {
+      setSearchLoading(false);
     }
   };
 
-  const handleRejectRequest = (requestId) => {
-    setFriendRequests(friendRequests.filter(f => f.id !== requestId));
+  const handleSendFriendRequest = async (userId) => {
+    try {
+      await friendService.sendFriendRequest(userId);
+      setError('');
+      // Update search results to reflect the sent request
+      setSearchResults(prev => prev.map(user => 
+        user._id === userId ? { ...user, friendshipStatus: 'pending' } : user
+      ));
+    } catch (error) {
+      setError('Failed to send friend request');
+      console.error('Error sending friend request:', error);
+    }
   };
 
-  const handleRemoveFriend = (friendId) => {
-    setFriends(friends.filter(f => f.id !== friendId));
+  const handleAcceptRequest = async (requestId) => {
+    try {
+      await friendService.acceptFriendRequest(requestId);
+      await loadFriendsData(); // Reload all data
+      setError('');
+    } catch (error) {
+      setError('Failed to accept friend request');
+      console.error('Error accepting friend request:', error);
+    }
   };
 
-  const filteredFriends = friends.filter(friend =>
-    friend.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    friend.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleRejectRequest = async (requestId) => {
+    try {
+      await friendService.rejectFriendRequest(requestId);
+      setFriendRequests(prev => prev.filter(req => req._id !== requestId));
+      setError('');
+    } catch (error) {
+      setError('Failed to reject friend request');
+      console.error('Error rejecting friend request:', error);
+    }
+  };
+
+  const handleRemoveFriend = async (friendId) => {
+    try {
+      await friendService.removeFriend(friendId);
+      setFriends(prev => prev.filter(friend => friend.friend._id !== friendId));
+      setError('');
+    } catch (error) {
+      setError('Failed to remove friend');
+      console.error('Error removing friend:', error);
+    }
+  };
+
+  const getFriendStatusText = (status) => {
+    switch (status) {
+      case 'pending': return 'Request Pending';
+      case 'accepted': return 'Friends';
+      case 'rejected': return 'Request Rejected';
+      default: return 'Add Friend';
+    }
+  };
+
+  const getFriendStatusColor = (status) => {
+    switch (status) {
+      case 'pending': return '#ffc107';
+      case 'accepted': return '#28a745';
+      case 'rejected': return '#dc3545';
+      default: return '#667eea';
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="friends-container">
+        <div className="loading">Loading friends...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="friends-container">
@@ -107,13 +137,18 @@ const Friends = () => {
         <div className="search-box">
           <input
             type="text"
-            placeholder="Search friends..."
+            placeholder="Search users by username or email..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              handleSearch(e.target.value);
+            }}
           />
           <span className="search-icon">Ì¥ç</span>
         </div>
       </div>
+
+      {error && <div className="error-message">{error}</div>}
 
       {/* Friends Navigation */}
       <div className="friends-nav">
@@ -130,10 +165,10 @@ const Friends = () => {
           Requests ({friendRequests.length})
         </button>
         <button 
-          className={`nav-item ${activeTab === 'suggestions' ? 'active' : ''}`}
-          onClick={() => setActiveTab('suggestions')}
+          className={`nav-item ${activeTab === 'search' ? 'active' : ''}`}
+          onClick={() => setActiveTab('search')}
         >
-          Suggestions ({suggestedFriends.length})
+          Find Friends
         </button>
       </div>
 
@@ -141,56 +176,45 @@ const Friends = () => {
       <div className="friends-content">
         {activeTab === 'friends' && (
           <div className="tab-content">
-            {filteredFriends.length === 0 ? (
+            {friends.length === 0 ? (
               <div className="empty-state">
                 <div className="empty-icon">Ì±•</div>
                 <h3>No friends yet</h3>
                 <p>Connect with friends to see their progress and stay motivated!</p>
                 <button 
                   className="btn-primary"
-                  onClick={() => setActiveTab('suggestions')}
+                  onClick={() => setActiveTab('search')}
                 >
                   Find Friends
                 </button>
               </div>
             ) : (
               <div className="friends-grid">
-                {filteredFriends.map(friend => (
-                  <div key={friend.id} className="friend-card">
+                {friends.map(friendship => (
+                  <div key={friendship._id} className="friend-card">
                     <div className="friend-header">
                       <div className="friend-avatar">
-                        {friend.avatar}
+                        {friendship.friend.username?.charAt(0).toUpperCase() || 'U'}
                       </div>
                       <div className="friend-info">
-                        <h4>{friend.name}</h4>
-                        <span className="friend-username">@{friend.username}</span>
+                        <h4>{friendship.friend.username}</h4>
+                        <span className="friend-email">{friendship.friend.email}</span>
                       </div>
                       <button 
                         className="btn-small btn-danger"
-                        onClick={() => handleRemoveFriend(friend.id)}
+                        onClick={() => handleRemoveFriend(friendship.friend._id)}
                       >
                         Remove
                       </button>
                     </div>
                     
-                    <div className="friend-stats">
-                      <div className="friend-stat">
-                        <span className="stat-number">{friend.goalsCompleted}</span>
-                        <span className="stat-label">Goals Completed</span>
-                      </div>
-                      <div className="friend-stat">
-                        <span className="stat-number">{friend.currentStreak}</span>
-                        <span className="stat-label">Day Streak</span>
-                      </div>
-                      <div className="friend-stat">
-                        <span className="stat-number">{friend.mutualFriends}</span>
-                        <span className="stat-label">Mutual Friends</span>
-                      </div>
-                    </div>
-                    
-                    <div className="friend-actions">
-                      <button className="btn-secondary">View Profile</button>
-                      <button className="btn-primary">Message</button>
+                    <div className="friend-status">
+                      <span 
+                        className="status-badge"
+                        style={{ backgroundColor: getFriendStatusColor(friendship.status) }}
+                      >
+                        {getFriendStatusText(friendship.status)}
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -203,23 +227,23 @@ const Friends = () => {
           <div className="tab-content">
             {friendRequests.length === 0 ? (
               <div className="empty-state">
-                <div className="empty-icon">Ì≥®</div>
+                <div className="empty-icon">ÔøΩÔøΩ</div>
                 <h3>No friend requests</h3>
                 <p>When someone sends you a friend request, it will appear here.</p>
               </div>
             ) : (
               <div className="requests-list">
                 {friendRequests.map(request => (
-                  <div key={request.id} className="request-card">
+                  <div key={request._id} className="request-card">
                     <div className="request-header">
                       <div className="friend-avatar">
-                        {request.avatar}
+                        {request.requestedBy.username?.charAt(0).toUpperCase() || 'U'}
                       </div>
                       <div className="request-info">
-                        <h4>{request.name}</h4>
-                        <span className="friend-username">@{request.username}</span>
-                        <span className="mutual-friends">
-                          {request.mutualFriends} mutual friends
+                        <h4>{request.requestedBy.username}</h4>
+                        <span className="friend-email">{request.requestedBy.email}</span>
+                        <span className="request-date">
+                          {new Date(request.createdAt).toLocaleDateString()}
                         </span>
                       </div>
                     </div>
@@ -227,13 +251,13 @@ const Friends = () => {
                     <div className="request-actions">
                       <button 
                         className="btn-primary"
-                        onClick={() => handleAcceptRequest(request.id)}
+                        onClick={() => handleAcceptRequest(request._id)}
                       >
                         Accept
                       </button>
                       <button 
                         className="btn-secondary"
-                        onClick={() => handleRejectRequest(request.id)}
+                        onClick={() => handleRejectRequest(request._id)}
                       >
                         Reject
                       </button>
@@ -245,42 +269,62 @@ const Friends = () => {
           </div>
         )}
 
-        {activeTab === 'suggestions' && (
+        {activeTab === 'search' && (
           <div className="tab-content">
-            {suggestedFriends.length === 0 ? (
-              <div className="empty-state">
-                <div className="empty-icon">Ìºü</div>
-                <h3>No suggestions available</h3>
-                <p>Check back later for new friend suggestions!</p>
-              </div>
-            ) : (
-              <div className="suggestions-grid">
-                {suggestedFriends.map(suggestion => (
-                  <div key={suggestion.id} className="suggestion-card">
-                    <div className="suggestion-header">
+            <div className="search-section">
+              <h3>Find Friends</h3>
+              <p>Search for users by username or email to connect with them.</p>
+              
+              {searchLoading && <div className="loading-small">Searching...</div>}
+              
+              {searchResults.length === 0 && searchTerm.length >= 2 && !searchLoading && (
+                <div className="empty-state-small">
+                  <p>No users found matching "{searchTerm}"</p>
+                </div>
+              )}
+
+              <div className="search-results">
+                {searchResults.map(user => (
+                  <div key={user._id} className="search-result-card">
+                    <div className="result-header">
                       <div className="friend-avatar">
-                        {suggestion.avatar}
+                        {user.username?.charAt(0).toUpperCase() || 'U'}
                       </div>
-                      <div className="suggestion-info">
-                        <h4>{suggestion.name}</h4>
-                        <span className="friend-username">@{suggestion.username}</span>
-                        <div className="suggestion-details">
-                          <span>{suggestion.mutualFriends} mutual friends</span>
-                          <span>{suggestion.commonGoals} common goals</span>
-                        </div>
+                      <div className="result-info">
+                        <h4>{user.username}</h4>
+                        <span className="friend-email">{user.email}</span>
                       </div>
                     </div>
                     
-                    <button 
-                      className="btn-primary"
-                      onClick={() => handleAddFriend(suggestion.id)}
-                    >
-                      Add Friend
-                    </button>
+                    <div className="result-actions">
+                      {user.friendshipStatus === 'none' && (
+                        <button 
+                          className="btn-primary"
+                          onClick={() => handleSendFriendRequest(user._id)}
+                        >
+                          Add Friend
+                        </button>
+                      )}
+                      {user.friendshipStatus === 'pending' && (
+                        <span className="status-text">Request Sent</span>
+                      )}
+                      {user.friendshipStatus === 'accepted' && (
+                        <span className="status-text">Already Friends</span>
+                      )}
+                      {user.friendshipStatus === 'rejected' && (
+                        <span className="status-text">Request Rejected</span>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
-            )}
+
+              {searchTerm.length < 2 && (
+                <div className="search-prompt">
+                  <p>Enter at least 2 characters to search for users</p>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>

@@ -45,6 +45,16 @@
   color: #666;
 }
 
+.error-message {
+  background: #fef2f2;
+  color: #dc2626;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #fecaca;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+}
+
 /* Friends Navigation */
 .friends-nav {
   display: flex;
@@ -90,7 +100,7 @@
 /* Friends Grid */
 .friends-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 20px;
 }
 
@@ -111,7 +121,7 @@
   display: flex;
   align-items: center;
   gap: 15px;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
 
 .friend-avatar {
@@ -136,44 +146,23 @@
   color: #333;
 }
 
-.friend-username {
+.friend-email {
   color: #666;
   font-size: 0.9rem;
 }
 
-.friend-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
-  margin-bottom: 20px;
-  padding: 15px;
-  background: white;
-  border-radius: 10px;
+.friend-status {
+  margin-top: 15px;
 }
 
-.friend-stat {
-  text-align: center;
-}
-
-.stat-number {
-  display: block;
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #667eea;
-}
-
-.stat-label {
-  display: block;
-  font-size: 0.7rem;
-  color: #666;
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-top: 5px;
-}
-
-.friend-actions {
-  display: flex;
-  gap: 10px;
 }
 
 /* Requests List */
@@ -204,9 +193,11 @@
   color: #333;
 }
 
-.mutual-friends {
+.request-date {
   font-size: 0.8rem;
   color: #666;
+  margin-top: 5px;
+  display: block;
 }
 
 .request-actions {
@@ -214,14 +205,47 @@
   gap: 10px;
 }
 
-/* Suggestions Grid */
-.suggestions-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
+/* Search Section */
+.search-section h3 {
+  margin: 0 0 10px 0;
+  color: #333;
 }
 
-.suggestion-card {
+.search-section p {
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.loading-small {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+
+.empty-state-small {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.search-prompt {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  background: #f8f9fa;
+  border-radius: 12px;
+}
+
+.search-results {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.search-result-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -231,27 +255,21 @@
   border-left: 4px solid #28a745;
 }
 
-.suggestion-header {
+.result-header {
   display: flex;
   align-items: center;
   gap: 15px;
 }
 
-.suggestion-info h4 {
+.result-info h4 {
   margin: 0 0 5px 0;
   color: #333;
 }
 
-.suggestion-details {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-top: 5px;
-}
-
-.suggestion-details span {
-  font-size: 0.8rem;
+.status-text {
   color: #666;
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 
 /* Buttons */
@@ -324,6 +342,15 @@
   margin-bottom: 30px;
 }
 
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 1.1rem;
+  color: #666;
+}
+
 /* Responsive */
 @media (max-width: 968px) {
   .friends-header {
@@ -338,27 +365,15 @@
   .friends-grid {
     grid-template-columns: 1fr;
   }
-  
-  .suggestions-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (max-width: 768px) {
   .friend-card,
   .request-card,
-  .suggestion-card {
+  .search-result-card {
     flex-direction: column;
     gap: 15px;
     text-align: center;
-  }
-  
-  .friend-stats {
-    grid-template-columns: repeat(3, 1fr);
-  }
-  
-  .friend-actions {
-    justify-content: center;
   }
   
   .request-actions {
