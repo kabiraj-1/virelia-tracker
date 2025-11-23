@@ -10,6 +10,7 @@ import authRoutes from './routes/authRoutes.js';
 import goalRoutes from './routes/goalRoutes.js';
 import friendRoutes from './routes/friendRoutes.js';
 import socialRoutes from './routes/socialRoutes.js';
+import healthRoutes from './routes/healthRoutes.js';
 
 dotenv.config();
 
@@ -46,13 +47,15 @@ app.use('/api/auth', authRoutes);
 app.use('/api/goals', goalRoutes);
 app.use('/api/friends', friendRoutes);
 app.use('/api/social', socialRoutes);
+app.use('/api/health', healthRoutes);
 
-// Health check
+// Basic health check
 app.get('/api/health', (req, res) => {
   res.json({ 
     message: 'Virelia Tracker API is running!',
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || 'development',
+    version: '2.0.0'
   });
 });
 
@@ -75,6 +78,7 @@ if (!fs.existsSync(uploadsDir)) {
 const PORT = process.env.PORT || 5001;
 
 app.listen(PORT, () => {
-  console.log(`ï¿½ï¿½ Server running on port ${PORT}`);
+  console.log(`íº€ Server running on port ${PORT}`);
   console.log(`í´— Health check: http://localhost:${PORT}/api/health`);
+  console.log(`í´— Deep health: http://localhost:${PORT}/api/health/deep`);
 });

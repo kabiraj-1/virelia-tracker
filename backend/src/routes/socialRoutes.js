@@ -2,38 +2,14 @@ import express from 'express';
 import Post from '../models/Post.js';
 import Friend from '../models/Friend.js';
 import { auth } from '../middleware/auth.js';
-import multer from 'multer';
-import path from 'path';
 
 const router = express.Router();
 
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/');
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
+// Simple in-memory storage for demo (replace with proper file storage in production)
+const storage = {};
 
-const upload = multer({
-  storage: storage,
-  limits: {
-    fileSize: 10 * 1024 * 1024 // 10MB limit
-  },
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) {
-      cb(null, true);
-    } else {
-      cb(new Error('Only image and video files are allowed!'), false);
-    }
-  }
-});
-
-// Create a post
-router.post('/posts', auth, upload.array('media', 5), async (req, res) => {
+// Create a post (without file uploads for now to simplify deployment)
+router.post('/posts', auth, async (req, res) => {
   try {
     const { content, goalId, scheduledPublish, visibility = 'friends' } = req.body;
     
@@ -51,13 +27,6 @@ router.post('/posts', auth, upload.array('media', 5), async (req, res) => {
     if (scheduledPublish) {
       postData.scheduledPublish = new Date(scheduledPublish);
       postData.isPublished = false;
-    }
-
-    if (req.files && req.files.length > 0) {
-      postData.media = req.files.map(file => ({
-        url: `/uploads/${file.filename}`,
-        mimetype: file.mimetype
-      }));
     }
 
     const post = new Post(postData);
