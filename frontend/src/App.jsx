@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Navbar from './components/layout/Navbar';
+import LandingPage from './components/landing/LandingPage';
 import LoginForm from './components/auth/LoginForm';
 import RegisterForm from './components/auth/RegisterForm';
 import Dashboard from './components/dashboard/Dashboard';
@@ -20,7 +21,7 @@ const ProtectedRoute = ({ children }) => {
     return <div className="loading">Loading...</div>;
   }
   
-  return user ? children : <Navigate to="/login" />;
+  return user ? children : <Navigate to="/" />;
 };
 
 const PublicRoute = ({ children }) => {
@@ -41,6 +42,7 @@ function App() {
           <Navbar />
           <main className="main-content">
             <Routes>
+              <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={
                 <PublicRoute>
                   <LoginForm />
@@ -86,7 +88,6 @@ function App() {
                   <Analytics />
                 </ProtectedRoute>
               } />
-              <Route path="/" element={<Navigate to="/dashboard" />} />
             </Routes>
           </main>
         </div>
