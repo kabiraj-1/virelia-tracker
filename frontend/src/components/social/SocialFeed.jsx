@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import socialService from '../../services/socialService';
 import './SocialFeed.css';
 
 const SocialFeed = () => {
@@ -11,50 +10,39 @@ const SocialFeed = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Load posts from backend
-  const loadPosts = async () => {
-    try {
-      setLoading(true);
-      // For now, we'll use mock data since Post model might not be ready
-      // Once backend is fully ready, uncomment the line below:
-      // const feedData = await socialService.getFeed();
-      
-      // Mock posts for demonstration
-      const mockPosts = [
-        {
-          _id: '1',
-          user: { username: 'sarah', _id: '123' },
-          content: 'Just completed my morning run! ÌøÉ‚Äç‚ôÄÔ∏è Feeling amazing and ready to tackle the day!',
-          createdAt: new Date().toISOString(),
-          likes: [],
-          comments: []
-        },
-        {
-          _id: '2', 
-          user: { username: 'mike', _id: '124' },
-          content: 'Working on my coding skills. Completed 3 hours of practice today! Ì≤ª',
-          createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-          likes: [{ user: { _id: '123' } }],
-          comments: [
-            {
-              user: { username: 'sarah' },
-              content: 'Great job Mike! Keep it up!',
-              createdAt: new Date().toISOString()
-            }
-          ]
-        }
-      ];
-      setPosts(mockPosts);
-    } catch (error) {
-      console.error('Error loading posts:', error);
-      setError('Failed to load posts');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Load mock posts
   useEffect(() => {
-    loadPosts();
+    const mockPosts = [
+      {
+        _id: '1',
+        user: { username: 'sarah', _id: '123' },
+        content: 'Just completed my morning run! ÌøÉ‚Äç‚ôÄÔ∏è Feeling amazing and ready to tackle the day! #fitness #goals',
+        createdAt: new Date().toISOString(),
+        likes: [{ user: { _id: '124' } }],
+        comments: [
+          {
+            user: { username: 'mike' },
+            content: 'Awesome work Sarah! Keep it up! Ì≤™',
+            createdAt: new Date().toISOString()
+          }
+        ]
+      },
+      {
+        _id: '2', 
+        user: { username: 'mike', _id: '124' },
+        content: 'Working on my coding skills. Completed 3 hours of practice today! Ì≤ª #programming #learning',
+        createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+        likes: [{ user: { _id: '123' } }, { user: { _id: '125' } }],
+        comments: [
+          {
+            user: { username: 'sarah' },
+            content: 'Great job Mike! What are you learning?',
+            createdAt: new Date().toISOString()
+          }
+        ]
+      }
+    ];
+    setPosts(mockPosts);
   }, []);
 
   const handleCreatePost = async (e) => {
@@ -65,7 +53,7 @@ const SocialFeed = () => {
       setLoading(true);
       setError('');
       
-      // Create a mock post for now
+      // Create a new post
       const newPost = {
         _id: Date.now().toString(),
         user: { username: user.username, _id: user.id },
@@ -77,12 +65,10 @@ const SocialFeed = () => {
 
       setPosts(prev => [newPost, ...prev]);
       setContent('');
-      setSuccess('Post created successfully!');
+      setSuccess('Post created successfully! Ìæâ');
       
-      // Clear success message after 3 seconds
       setTimeout(() => setSuccess(''), 3000);
     } catch (error) {
-      console.error('Error creating post:', error);
       setError('Failed to create post');
     } finally {
       setLoading(false);
@@ -90,28 +76,23 @@ const SocialFeed = () => {
   };
 
   const handleLike = async (postId) => {
-    try {
-      // Toggle like locally for now
-      setPosts(prev => prev.map(post => {
-        if (post._id === postId) {
-          const isLiked = post.likes.some(like => like.user._id === user.id);
-          if (isLiked) {
-            return {
-              ...post,
-              likes: post.likes.filter(like => like.user._id !== user.id)
-            };
-          } else {
-            return {
-              ...post,
-              likes: [...post.likes, { user: { _id: user.id } }]
-            };
-          }
+    setPosts(prev => prev.map(post => {
+      if (post._id === postId) {
+        const isLiked = post.likes.some(like => like.user._id === user.id);
+        if (isLiked) {
+          return {
+            ...post,
+            likes: post.likes.filter(like => like.user._id !== user.id)
+          };
+        } else {
+          return {
+            ...post,
+            likes: [...post.likes, { user: { _id: user.id } }]
+          };
         }
-        return post;
-      }));
-    } catch (error) {
-      console.error('Error liking post:', error);
-    }
+      }
+      return post;
+    }));
   };
 
   return (
@@ -128,7 +109,7 @@ const SocialFeed = () => {
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Share your progress, achievements, or thoughts..."
+              placeholder="What's on your mind? Share your progress, achievements, or thoughts..."
               rows="3"
               maxLength="500"
               className="post-textarea"
@@ -140,7 +121,7 @@ const SocialFeed = () => {
                 disabled={!content.trim() || loading}
                 className="post-submit-btn"
               >
-                {loading ? 'Posting...' : 'Post'}
+                {loading ? 'Posting...' : 'Post Ì∫Ä'}
               </button>
             </div>
           </div>
@@ -152,9 +133,7 @@ const SocialFeed = () => {
 
       {/* Posts Feed */}
       <div className="posts-container">
-        {loading && posts.length === 0 ? (
-          <div className="loading">Loading posts...</div>
-        ) : posts.length === 0 ? (
+        {posts.length === 0 ? (
           <div className="empty-feed">
             <div className="empty-icon">Ì≥ù</div>
             <h3>No posts yet</h3>
@@ -186,8 +165,7 @@ const PostCard = ({ post, onLike, currentUser }) => {
   const handleAddComment = (e) => {
     e.preventDefault();
     if (comment.trim()) {
-      // For now, we'll just show an alert since backend integration is pending
-      alert('Comment functionality will be available when backend is fully configured');
+      alert('Comment functionality will be fully integrated with the backend soon!');
       setComment('');
     }
   };
