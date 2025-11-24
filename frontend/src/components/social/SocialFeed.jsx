@@ -16,13 +16,13 @@ const SocialFeed = () => {
       {
         _id: '1',
         user: { username: 'sarah', _id: '123' },
-        content: 'Just completed my morning run! ÌøÉ‚Äç‚ôÄÔ∏è Feeling amazing and ready to tackle the day! #fitness #goals',
+        content: 'Just completed my morning run! Feeling amazing and ready to tackle the day! #fitness #goals',
         createdAt: new Date().toISOString(),
         likes: [{ user: { _id: '124' } }],
         comments: [
           {
             user: { username: 'mike' },
-            content: 'Awesome work Sarah! Keep it up! Ì≤™',
+            content: 'Awesome work Sarah! Keep it up!',
             createdAt: new Date().toISOString()
           }
         ]
@@ -30,7 +30,7 @@ const SocialFeed = () => {
       {
         _id: '2', 
         user: { username: 'mike', _id: '124' },
-        content: 'Working on my coding skills. Completed 3 hours of practice today! Ì≤ª #programming #learning',
+        content: 'Working on my coding skills. Completed 3 hours of practice today! #programming #learning',
         createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
         likes: [{ user: { _id: '123' } }, { user: { _id: '125' } }],
         comments: [
@@ -65,7 +65,7 @@ const SocialFeed = () => {
 
       setPosts(prev => [newPost, ...prev]);
       setContent('');
-      setSuccess('Post created successfully! Ìæâ');
+      setSuccess('Post created successfully!');
       
       setTimeout(() => setSuccess(''), 3000);
     } catch (error) {
@@ -98,7 +98,7 @@ const SocialFeed = () => {
   return (
     <div className="social-feed">
       <div className="feed-header">
-        <h1>Ì≥± Social Feed</h1>
+        <h1>Social Feed</h1>
         <p>Share your progress and connect with friends</p>
       </div>
 
@@ -121,7 +121,7 @@ const SocialFeed = () => {
                 disabled={!content.trim() || loading}
                 className="post-submit-btn"
               >
-                {loading ? 'Posting...' : 'Post Ì∫Ä'}
+                {loading ? 'Posting...' : 'Post'}
               </button>
             </div>
           </div>
@@ -135,7 +135,7 @@ const SocialFeed = () => {
       <div className="posts-container">
         {posts.length === 0 ? (
           <div className="empty-feed">
-            <div className="empty-icon">Ì≥ù</div>
+            <div className="empty-icon">Post</div>
             <h3>No posts yet</h3>
             <p>Be the first to share your progress!</p>
           </div>
@@ -199,13 +199,13 @@ const PostCard = ({ post, onLike, currentUser }) => {
           className={`like-btn ${isLiked ? 'liked' : ''}`}
           onClick={() => onLike(post._id)}
         >
-          {isLiked ? '‚ù§Ô∏è Liked' : 'Ì¥ç Like'}
+          {isLiked ? 'Liked' : 'Like'}
         </button>
         <button 
           className="comment-btn"
           onClick={() => setShowComments(!showComments)}
         >
-          Ì≤¨ Comment
+          Comment
         </button>
       </div>
 
