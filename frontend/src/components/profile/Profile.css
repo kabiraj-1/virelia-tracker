@@ -1,102 +1,84 @@
-.profile-page {
+.profile-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
 }
 
-/* Profile Header */
 .profile-header {
   display: flex;
-  align-items: center;
-  gap: 30px;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 30px;
   background: white;
-  padding: 40px;
+  padding: 30px;
   border-radius: 20px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-  margin-bottom: 30px;
-  position: relative;
+}
+
+.profile-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
 }
 
 .profile-avatar {
-  position: relative;
-}
-
-.avatar-placeholder {
-  width: 120px;
-  height: 120px;
+  width: 80px;
+  height: 80px;
   background: linear-gradient(135deg, #667eea, #764ba2);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 3rem;
   color: white;
+  font-size: 2rem;
   font-weight: bold;
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
 }
 
-.achievement-badge {
-  position: absolute;
-  bottom: 5px;
-  right: 5px;
-  background: white;
-  border: 3px solid;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2rem;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-}
-
-.profile-info {
-  flex: 1;
-}
-
-.profile-main h1 {
-  margin: 0 0 10px 0;
-  font-size: 2.5rem;
+.profile-details h1 {
+  margin: 0 0 5px 0;
   color: #333;
+  font-size: 2rem;
 }
 
-.achievement-level {
+.profile-title {
+  color: #666;
+  margin: 0 0 20px 0;
   font-size: 1.1rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 .profile-stats {
   display: flex;
   gap: 30px;
-  margin-top: 20px;
 }
 
-.profile-stat {
+.stat {
   text-align: center;
 }
 
 .stat-number {
   display: block;
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #667eea;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
 }
 
 .stat-label {
-  display: block;
   font-size: 0.9rem;
   color: #666;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-top: 5px;
 }
 
-.profile-actions {
-  display: flex;
-  gap: 15px;
+.edit-profile-btn {
+  padding: 10px 20px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.edit-profile-btn:hover {
+  background: #5a6fd8;
 }
 
 /* Profile Navigation */
@@ -107,6 +89,7 @@
   padding: 10px;
   margin-bottom: 30px;
   box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+  gap: 5px;
 }
 
 .nav-item {
@@ -133,57 +116,54 @@
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
+.posts-nav-item {
+  background: #28a745;
+  color: white;
+}
+
+.posts-nav-item:hover {
+  background: #218838;
+}
+
 /* Profile Content */
 .profile-content {
   background: white;
   border-radius: 20px;
-  padding: 40px;
+  padding: 30px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
-.tab-content h3 {
-  margin: 0 0 30px 0;
-  color: #333;
-  font-size: 1.5rem;
-}
-
-/* Overview Grid */
 .overview-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 30px;
+  gap: 20px;
 }
 
 .overview-card {
   background: #f8f9fa;
-  padding: 30px;
+  padding: 25px;
   border-radius: 15px;
-  text-align: center;
-  transition: transform 0.3s ease;
-}
-
-.overview-card:hover {
-  transform: translateY(-5px);
+  border-left: 4px solid #667eea;
 }
 
 .overview-card h3 {
   margin: 0 0 20px 0;
   color: #333;
+  font-size: 1.2rem;
 }
 
-/* Progress Circle */
 .progress-circle {
   position: relative;
   width: 120px;
   height: 120px;
-  margin: 0 auto 20px;
+  margin: 0 auto 15px;
 }
 
 .circle-background {
   width: 100%;
   height: 100%;
-  border: 10px solid #e9ecef;
   border-radius: 50%;
+  background: #e9ecef;
 }
 
 .circle-progress {
@@ -192,12 +172,9 @@
   left: 0;
   width: 100%;
   height: 100%;
-  border: 10px solid #667eea;
   border-radius: 50%;
-  border-right-color: transparent;
-  border-bottom-color: transparent;
-  transform-origin: center;
-  transition: transform 1s ease;
+  background: conic-gradient(#667eea 0deg, #e9ecef 0deg);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
 }
 
 .circle-text {
@@ -211,341 +188,103 @@
 .progress-percent {
   display: block;
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: bold;
   color: #333;
 }
 
 .progress-label {
-  display: block;
   font-size: 0.8rem;
   color: #666;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
-/* Streak Display */
+.progress-description {
+  text-align: center;
+  color: #666;
+  margin: 15px 0 0 0;
+}
+
 .streak-display {
   text-align: center;
-  margin: 20px 0;
+  margin-bottom: 15px;
 }
 
 .streak-number {
   display: block;
   font-size: 3rem;
-  font-weight: 700;
+  font-weight: bold;
   color: #ff6b6b;
-  line-height: 1;
 }
 
 .streak-label {
-  display: block;
   font-size: 1rem;
   color: #666;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-top: 10px;
 }
 
-/* Distribution */
-.distribution {
+.streak-description {
+  text-align: center;
+  color: #666;
+  margin: 0;
+}
+
+.goal-distribution {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 10px;
 }
 
-.dist-item {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.dist-label {
-  min-width: 100px;
-  font-size: 0.9rem;
-  color: #666;
-}
-
-.dist-bar {
-  flex: 1;
-  height: 8px;
-  background: #e9ecef;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.dist-fill {
-  height: 100%;
-  border-radius: 4px;
-  transition: width 0.5s ease;
-}
-
-.dist-fill.completed {
-  background: #28a745;
-}
-
-.dist-fill.in-progress {
-  background: #667eea;
-}
-
-.dist-count {
-  min-width: 30px;
-  text-align: right;
-  font-weight: 600;
-  color: #333;
-}
-
-/* Goals Grid */
-.goals-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 20px;
-}
-
-.goal-card {
-  background: #f8f9fa;
-  padding: 20px;
-  border-radius: 12px;
-  border-left: 4px solid #667eea;
-}
-
-.goal-header {
+.distribution-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
-}
-
-.goal-category {
-  background: #667eea;
-  color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  text-transform: capitalize;
-}
-
-.goal-status {
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.goal-status.completed {
-  color: #28a745;
-}
-
-.goal-status.in-progress {
-  color: #ffc107;
-}
-
-.goal-card h4 {
-  margin: 0 0 10px 0;
-  color: #333;
-}
-
-.goal-card p {
-  margin: 0 0 15px 0;
-  color: #666;
-  font-size: 0.9rem;
-}
-
-.goal-progress {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.goal-progress .progress-bar {
-  flex: 1;
-  height: 6px;
-  background: #e9ecef;
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.goal-progress .progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #667eea, #764ba2);
-  transition: width 0.3s ease;
-}
-
-.goal-date {
-  font-size: 0.8rem;
-  color: #888;
-}
-
-/* Settings Form */
-.settings-form {
-  max-width: 500px;
-}
-
-.settings-form .form-group {
-  margin-bottom: 25px;
-}
-
-.settings-form label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 600;
-  color: #333;
-}
-
-.settings-form input,
-.settings-form textarea {
-  width: 100%;
-  padding: 12px;
-  border: 2px solid #e9ecef;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: border-color 0.3s ease;
-}
-
-.settings-form input:focus,
-.settings-form textarea:focus {
-  outline: none;
-  border-color: #667eea;
-}
-
-.settings-form input:disabled,
-.settings-form textarea:disabled {
-  background: #f8f9fa;
-  color: #666;
-}
-
-.edit-input.large {
-  font-size: 2.5rem;
-  font-weight: bold;
-  border: 2px solid #667eea;
+  padding: 10px;
   background: white;
+  border-radius: 8px;
 }
 
-/* Achievements Grid */
-.achievements-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
+.distribution-label {
+  color: #666;
 }
 
-.achievement-card {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  padding: 20px;
-  background: #f8f9fa;
-  border-radius: 12px;
-  border-left: 4px solid #667eea;
-}
-
-.achievement-card.unlocked {
-  opacity: 1;
-}
-
-.achievement-card.locked {
-  opacity: 0.6;
-}
-
-.achievement-icon {
-  font-size: 2rem;
-}
-
-.achievement-info {
-  flex: 1;
-}
-
-.achievement-info h4 {
-  margin: 0 0 5px 0;
+.distribution-count {
+  font-weight: bold;
   color: #333;
 }
 
-.achievement-info p {
-  margin: 0;
+.tab-content h3 {
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.tab-content p {
   color: #666;
-  font-size: 0.9rem;
-}
-
-.achievement-badge {
-  font-size: 1.5rem;
-}
-
-/* Buttons */
-.btn-primary, .btn-secondary {
-  padding: 12px 24px;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-decoration: none;
-  display: inline-block;
-  text-align: center;
-}
-
-.btn-primary {
-  background: #667eea;
-  color: white;
-}
-
-.btn-primary:hover {
-  background: #5a6fd8;
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-}
-
-.btn-secondary {
-  background: #6c757d;
-  color: white;
-}
-
-.btn-secondary:hover {
-  background: #545b62;
-  transform: translateY(-2px);
-}
-
-.loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 200px;
-  font-size: 1.1rem;
-  color: #666;
-}
-
-/* Responsive Design */
-@media (max-width: 968px) {
-  .profile-header {
-    flex-direction: column;
-    text-align: center;
-    gap: 20px;
-  }
-  
-  .profile-stats {
-    justify-content: center;
-  }
-  
-  .profile-actions {
-    justify-content: center;
-  }
-  
-  .overview-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .goals-grid {
-    grid-template-columns: 1fr;
-  }
+  line-height: 1.6;
 }
 
 @media (max-width: 768px) {
-  .profile-nav {
+  .profile-header {
     flex-direction: column;
-  }
-  
-  .profile-stats {
-    flex-wrap: wrap;
     gap: 20px;
   }
   
-  .achievements-grid {
+  .profile-info {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .profile-stats {
+    justify-content: center;
+  }
+  
+  .profile-nav {
+    flex-wrap: wrap;
+  }
+  
+  .nav-item {
+    flex: 1 1 calc(50% - 10px);
+    min-width: 120px;
+  }
+  
+  .overview-grid {
     grid-template-columns: 1fr;
   }
 }
