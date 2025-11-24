@@ -31,13 +31,25 @@ const Navbar = () => {
                 to="/goals" 
                 className={`nav-link ${location.pathname === '/goals' ? 'active' : ''}`}
               >
-                ÌæØ Goals
+                ÔøΩÔøΩ Goals
+              </Link>
+              <Link 
+                to="/activities" 
+                className={`nav-link ${location.pathname === '/activities' ? 'active' : ''}`}
+              >
+                ‚è±Ô∏è Activities
               </Link>
               <Link 
                 to="/friends" 
                 className={`nav-link ${location.pathname === '/friends' ? 'active' : ''}`}
               >
                 Ì±• Friends
+              </Link>
+              <Link 
+                to="/profile" 
+                className={`nav-link ${location.pathname === '/profile' ? 'active' : ''}`}
+              >
+                Ì±§ Profile
               </Link>
               <Link 
                 to="/feed" 

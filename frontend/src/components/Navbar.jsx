@@ -1,103 +1,86 @@
-import React, { useState, useEffect } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
-import Notifications from './Notifications'
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import './Navbar.css';
 
 const Navbar = () => {
-  const location = useLocation()
-  const navigate = useNavigate()
-  const [user, setUser] = useState(null)
-
-  useEffect(() => {
-    const checkAuth = () => {
-      const userData = localStorage.getItem('user')
-      if (userData) {
-        try {
-          setUser(JSON.parse(userData))
-        } catch (error) {
-          console.error('Error parsing user data:', error)
-          localStorage.removeItem('token')
-          localStorage.removeItem('user')
-          setUser(null)
-        }
-      } else {
-        setUser(null)
-      }
-    }
-
-    checkAuth()
-    
-    const handleStorageChange = () => {
-      checkAuth()
-    }
-
-    window.addEventListener('storage', handleStorageChange)
-    return () => window.removeEventListener('storage', handleStorageChange)
-  }, [location])
+  const { user, logout } = useAuth();
+  const location = useLocation();
 
   const handleLogout = () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
-    setUser(null)
-    navigate('/')
-  }
+    logout();
+  };
 
   return (
     <nav className="navbar">
       <div className="nav-container">
         <Link to="/" className="nav-logo">
-          Virelia
+          ÌæØ Virelia Tracker
         </Link>
         
         <div className="nav-menu">
-          <Link 
-            to="/" 
-            className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
-          >
-            Home
-          </Link>
-          {user && (
+          {user ? (
             <>
               <Link 
-                to="/dashboard" 
-                className={`nav-link ${location.pathname === '/dashboard' ? 'active' : ''}`}
+                to="/" 
+                className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
               >
-                Dashboard
+                Ì≥ä Dashboard
+              </Link>
+              <Link 
+                to="/goals" 
+                className={`nav-link ${location.pathname === '/goals' ? 'active' : ''}`}
+              >
+                ÌæØ Goals
+              </Link>
+              <Link 
+                to="/activities" 
+                className={`nav-link ${location.pathname === '/activities' ? 'active' : ''}`}
+              >
+                ‚è±Ô∏è Activities
+              </Link>
+              <Link 
+                to="/friends" 
+                className={`nav-link ${location.pathname === '/friends' ? 'active' : ''}`}
+              >
+                Ì±• Friends
               </Link>
               <Link 
                 to="/profile" 
                 className={`nav-link ${location.pathname === '/profile' ? 'active' : ''}`}
               >
-                Profile
+                Ì±§ Profile
               </Link>
-            </>
-          )}
-        </div>
-
-        <div className="nav-auth">
-          {user ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <Notifications />
-              <span style={{ color: '#64748b', fontSize: '0.875rem' }}>
-                Welcome, {user.name || user.email.split('@')[0]}
-              </span>
-              <button onClick={handleLogout} className="btn btn-secondary">
-                Logout
+              <Link 
+                to="/feed" 
+                className={`nav-link ${location.pathname === '/feed' ? 'active' : ''}`}
+              >
+                Ì≥± Posts
+              </Link>
+              <button onClick={handleLogout} className="nav-link logout-btn">
+                Ì∫™ Logout
               </button>
-            </div>
+            </>
           ) : (
             <>
-              <Link to="/login" className="btn btn-secondary">
-                Login
+              <Link 
+                to="/login" 
+                className={`nav-link ${location.pathname === '/login' ? 'active' : ''}`}
+              >
+                Ì¥ê Login
               </Link>
-              <Link to="/register" className="btn btn-primary">
-                Sign Up
+              <Link 
+                to="/register" 
+                className={`nav-link ${location.pathname === '/register' ? 'active' : ''}`}
+              >
+                Ì≥ù Register
               </Link>
             </>
           )}
         </div>
       </div>
     </nav>
-  )
-}
+  );
+};
 
-export default Navbar
+export default Navbar;
