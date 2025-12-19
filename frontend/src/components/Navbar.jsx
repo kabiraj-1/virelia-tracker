@@ -15,7 +15,7 @@ const Navbar = () => {
     <nav className="navbar">
       <div className="nav-container">
         <Link to="/" className="nav-logo">
-          ÌæØ Virelia Tracker
+           Virelia Tracker
         </Link>
         
         <div className="nav-menu">
@@ -25,13 +25,13 @@ const Navbar = () => {
                 to="/" 
                 className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
               >
-                Ì≥ä Dashboard
+                 Dashboard
               </Link>
               <Link 
                 to="/goals" 
                 className={`nav-link ${location.pathname === '/goals' ? 'active' : ''}`}
               >
-                ÌæØ Goals
+                 Goals
               </Link>
               <Link 
                 to="/activities" 
@@ -43,22 +43,28 @@ const Navbar = () => {
                 to="/friends" 
                 className={`nav-link ${location.pathname === '/friends' ? 'active' : ''}`}
               >
-                Ì±• Friends
+                 Friends
+              </Link>
+              <Link 
+                to="/friends" 
+                className={`nav-link ${location.pathname === '/feed' ? 'active' : ''}`}
+              >
+                 feed
               </Link>
               <Link 
                 to="/profile" 
                 className={`nav-link ${location.pathname === '/profile' ? 'active' : ''}`}
               >
-                Ì±§ Profile
+                 Profile
               </Link>
               <Link 
                 to="/feed" 
                 className={`nav-link ${location.pathname === '/feed' ? 'active' : ''}`}
               >
-                Ì≥± Posts
+                 Posts
               </Link>
               <button onClick={handleLogout} className="nav-link logout-btn">
-                Ì∫™ Logout
+                ÔøΩÔøΩÔøΩ Logout
               </button>
             </>
           ) : (
@@ -67,13 +73,13 @@ const Navbar = () => {
                 to="/login" 
                 className={`nav-link ${location.pathname === '/login' ? 'active' : ''}`}
               >
-                Ì¥ê Login
+                 Login
               </Link>
               <Link 
                 to="/register" 
                 className={`nav-link ${location.pathname === '/register' ? 'active' : ''}`}
               >
-                Ì≥ù Register
+                 Register
               </Link>
             </>
           )}

@@ -8,6 +8,7 @@ import Register from './components/auth/Register';
 import Goals from './components/goals/Goals';
 import Friends from './components/friends/Friends';
 import SocialFeed from './components/social/SocialFeed';
+import SimpleLocation from './components/location/SimpleLocation'; // Add this
 import './App.css';
 
 function ProtectedRoute({ children }) {
@@ -50,6 +51,15 @@ function App() {
                   </ProtectedRoute>
                 } 
               />
+              {/* Add Location Route */}
+              <Route 
+                path="/location" 
+                element={
+                  <ProtectedRoute>
+                    <SimpleLocation />
+                  </ProtectedRoute>
+                } 
+              />
             </Routes>
           </main>
         </div>
@@ -59,6 +69,3 @@ function App() {
 }
 
 export default App;
-// Social feed activation - Sun, Nov 23, 2025 10:43:42 PM
-// Deployment timestamp: Sun, Nov 23, 2025 10:52:51 PM
-// Social Feed Fix - Clean version without emoji issues Mon, Nov 24, 2025  9:24:43 PM

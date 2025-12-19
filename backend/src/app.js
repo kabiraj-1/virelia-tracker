@@ -8,6 +8,13 @@ require('dotenv').config();
 const app = express();
 const server = http.createServer(app);
 
+// Temporary fix to confirm CORS is the issue
+app.use(cors({
+  origin: '*', // Allows ALL origins
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 // Socket.io configuration for production
 const io = socketIo(server, {
   cors: {
